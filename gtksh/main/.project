@@ -3,6 +3,7 @@
 	<name>gtksh</name>
 	<comment></comment>
 	<projects>
+		<project>zhscript2</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
