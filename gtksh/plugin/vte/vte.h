@@ -12,9 +12,9 @@
 
 class vte___: public pub::plugin___ {
 public:
-	vte___();
-	virtual ~vte___();
+	std::string arg1_, env1_, cmd1_;
 
+	bool api__(void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret);
 	pub::view___* new_view__();
 };
 

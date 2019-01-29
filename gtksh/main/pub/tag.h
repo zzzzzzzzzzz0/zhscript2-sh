@@ -21,11 +21,10 @@ public:
 };
 
 class tags___ {
-private:
-	std::vector<tag___> a_;
 public:
+	std::vector<tag___> a_;
 	tags___(std::initializer_list<tag___> a) : a_(a) {}
-	char get__(const std::vector<std::string> &p, std::string &tag);
+	char get__(const std::vector<std::string> &p, std::string &tag, size_t *argc = nullptr, size_t from = 0);
 };
 
 } /* namespace pub */

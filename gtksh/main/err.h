@@ -11,20 +11,20 @@
 #include "pub/debug.h"
 
 class err___ : public pub::debug___ {
+private:
+	bool in_code_ = false;
+
+	std::ostream &out__();
+	void endl__();
+
 public:
-	void o31__(const char *s) {o__(s);}
+	std::string code_;
 
-	void buzu__(const std::vector<std::string>& p) {
-		o__(p, "参数不足");
-	}
-	void buzhichi__(const std::vector<std::string>& p) {
-		o__(p, "不支持");
-	}
-	void wufa__(const std::vector<std::string>& p) {
-		o__(p, "无法");
-	}
+	void o31__(const char *s);
 
-	err___(char c) {c_ = c;}
+	void buzu__(const std::vector<std::string>& p, size_t end = SIZE_MAX);
+	void buzhichi__(const std::vector<std::string>& p, size_t end = SIZE_MAX);
+	void wufa__(const std::vector<std::string>& p, size_t end = SIZE_MAX);
 };
 
 extern err___ err_;

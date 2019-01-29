@@ -51,7 +51,7 @@
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
 								</inputType>
-								<outputType id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.output.调数18" outputPrefix="../../../../bin/gtksh-plugin/" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.output"/>
+								<outputType id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.output.调数18" outputPrefix="../../../../../bin/zhscript2/gtksh-plugin/" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.output"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.so.debug.调数19" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.debug">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.调数20" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
@@ -260,23 +260,23 @@ public:
 static 插件名___ *plugin_ = nullptr;
 
 static pub::tags___ tags_ = {
-		//{"内容", ' ', 1},
+		//{"内容", " ", 1},
 };
 
-bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vector<std::string>& ret) {
-	const pub::tag___* tag;
+bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret) {
+	std::string tag;
 	switch(tags_.get__(p, tag)) {
 	case 'y':
-		switch(tag->flag2_) {
+		switch(tag[0]) {
 		case ' ':
 			break;
 		}
 		return true;
 	case '<':
-		pub::ext_->buzu__(p);
+		pub::ext_->buzu__(p, SIZE_MAX);
 		return true;
 	}
-	return pub::view___::api__(shangji, p, ret);
+	return pub::view___::api__(shangji, p, p2, ret);
 }
 
 void view___::new_open__(const std::vector<std::string>& p) {
@@ -318,7 +318,7 @@ public:
 	view___();
 	virtual ~view___();
 
-	bool api__(void* shangji, const std::vector<std::string>& p, std::vector<std::string>& ret);
+	bool api__(void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret);
 	void new_open__(const std::vector<std::string>& p);
 };
 
@@ -331,14 +331,15 @@ public:
 上代码。
 
 赋予作者以zzzzzzzzzzz。
+赋予包以gtk+-3.0。
 
 加载lib/clpars4。
 调用‘命令行加回调’、
 	-n、下代码
 		赋予插件名【设置】以‘参数1’
 	上代码、1、、
-	-p、“依赖包（pkg-config 包名）”、1、下代码
-		赋予包【上】以‘参数1’
+	-p、“依赖包（pkg-config 包名。默认 ‘包’）”、1、下代码
+		赋予包【上】以“‘包’ ‘参数1’”
 	上代码、
 	-ov、“是否覆盖（默认否）”、0、下代码
 		赋予‘参数0’【上】以‘参数1’
@@ -356,7 +357,7 @@ public:
 
 加载lib/gjk4。
 赋予插件大写名【设置】以调用‘大写方法’、‘插件名’。
-如果存在包那么
+如果‘包’那么
 	赋予库包参【设置】以“`pkg-config --libs ”  ‘包’`，
 	赋予细包参【设置】以“`pkg-config --cflags ”‘包’`。
 赋予调数【设置】以调用‘串格时间’、%y%m%d%H%M%S。
@@ -370,7 +371,7 @@ public:
 上代码、1、
 插件大写名、库包参、细包参、调数、发数、建立日期。
 
-加载lib/forqv4。
+加载lib/forqv。
 调用‘遍历变量’、‘变量区【文件】’、下代码
 	（显示‘参数’换行。）
 	别名名、值以参数1、参数2。

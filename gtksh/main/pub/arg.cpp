@@ -9,55 +9,57 @@
 
 namespace pub {
 
-bool args___::parse__(const std::vector<std::string>& p, size_t from) {
-	if(a_.size() == 0)
-		return false;
+int args___::parse__(const std::vector<std::string>& p, size_t from) {
 	arg___ *other = nullptr;
 	for(auto i2 : a_) {
-		if(!i2->tag_) {
-			other = i2;
+		if(i2.tag_.empty()) {
+			other = &i2;
 			break;
 		}
 	}
-	for(auto i = p.begin() += from; i != p.end();) {
-		const std::string &s = *i;
+	for(size_t i = from; i < p.size();) {
+		const std::string &s = p[i];
+		auto fn = [&](auto i2, bool xxi) {
+			if(i2->argc_ > 0) {
+				if(xxi)
+					++i;
+				i2->i_ = i;
+				i2->fn_(i2);
+				i += i2->argc_ - 1;
+				if(i >= p.size())
+					return false;
+				if(!xxi)
+					i++;
+			} else {
+				i2->i_ = i;
+				i2->fn_(i2);
+			}
+			return true;
+		};
 		bool has_tag = false;
 		for(auto i2 : a_) {
-			if(!i2->tag_)
-				continue;
-			if(s == i2->tag_) {
-				switch(i2->argc_) {
-				case -1:
-					i2->a_.push_back("1");
-					break;
-				case 0:
-					i2->a_.push_back("");
-					break;
-				default:
-					for(int i3 = 0; i3 < i2->argc_; i3++) {
-						if(++i == p.end())
-							return false;
-						i2->a_.push_back(*i);
-					}
+			for(i2.tag_i_ = 0; i2.tag_i_ < i2.tag_.size(); i2.tag_i_++) {
+				auto s2 = i2.tag_[i2.tag_i_];
+				if(s2 == s) {
+					if(!fn(&i2, true))
+						return 1;
+					has_tag = true;
 					break;
 				}
-				has_tag = true;
-				break;
 			}
+			if(has_tag)
+				break;
 		}
 		if(!has_tag) {
 			if(!other)
-				return false;
-			for(int i3 = 0; i3 < other->argc_; i3++, i++) {
-				if(i == p.end())
-					return false;
-				other->a_.push_back(*i);
-			}
+				return 2;
+			if(!fn(other, false))
+				return 1;
 			continue;
 		}
 		i++;
 	}
-	return true;
+	return 0;
 }
 
 } /* namespace pub */

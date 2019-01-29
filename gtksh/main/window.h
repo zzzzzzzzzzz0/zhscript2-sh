@@ -8,30 +8,29 @@
 #ifndef WINDOW_H_
 #define WINDOW_H_
 
-#include <gtk/gtk.h>
-#include <vector>
-#include <string>
+#include "pub/base.h"
+#include "pub/data.h"
 
-class window___ {
+class window___ : public pub::base___ {
 private:
 	void *add_ = nullptr;
 protected:
-	GtkWindow *hr_ = nullptr;
 	bool is_main_;
 public:
 	int width_ = -1, height_ = -1;
+	int x_ = -1, y_ = -1;
+	std::string state_;
 
-	window___(bool is_main = false);
+	window___(bool is_app_paintable = false, bool is_main = false);
 	virtual ~window___();
 
-	GtkWindow *hr__() {return hr_;}
-	GtkWidget *widget__() {return GTK_WIDGET(hr_);}
+	GtkWindow *hr__() {return GTK_WINDOW(hr_);}
 	GtkContainer *container__() {return GTK_CONTAINER (hr_);}
 	bool is_main__() {return is_main_;}
-	const char *name__() {return gtk_widget_get_name(widget__());}
 	void *add__() {return add_;}
+	void app_paintable__(GtkWidget *hr);
 
-	bool api__(void* shangji, const std::vector<std::string>& p, std::vector<std::string>& ret);
+	bool api__(void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret);
 
 	void destroy__();
 };

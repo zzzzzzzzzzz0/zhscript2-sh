@@ -5,19 +5,8 @@
 	分支‘参数0’先
 		创建 先
 			使大小、1100、700。
-			使标签页。
 			使内容、“<base target=_blank><title> 首页 </title>”
 			先+链https://baidu.com了
-			先+链about:blank了
-			先+链data:text/x-zhscript;下代码
-				‘外壳’
-			上代码了
-			先+链zhscript:下代码
-				‘外壳’
-			上代码了
-			先+链about:zhscript#下代码
-				‘外壳’
-			上代码了
 			。
 		了。
 		装载 先
@@ -34,4 +23,4 @@
 		了。
 	了。
 上代码。
-使创建、webkit。
+使创建、webkit、-标签页。

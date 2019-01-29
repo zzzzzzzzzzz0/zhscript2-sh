@@ -21,4 +21,12 @@ public:
 	void window_destroy__(window___ *w);
 };
 
+class liandong_pian___ {
+public:
+	int x_ = 0, y_ = 0;
+	bool get_ = false;
+	void get__(window___ *w, int x, int y);
+};
+extern liandong_pian___ liandong_pian_;
+
 #endif /* LIANDONG_H_ */

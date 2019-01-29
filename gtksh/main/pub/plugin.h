@@ -20,7 +20,7 @@ public:
 
 	plugin___();
 	virtual ~plugin___();
-	virtual bool api__(void* shangji, const std::vector<std::string>& p, std::vector<std::string>& ret) {return false;}
+	virtual bool api__(void* shangji, const std::vector<std::string>& p, std::vector<data___>* p2, std::vector<std::string>& ret) {return false;}
 	virtual view___* new_view__() {return new view___();}
 };
 

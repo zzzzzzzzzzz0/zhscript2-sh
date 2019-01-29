@@ -9,26 +9,35 @@
 #define ADD_H_
 
 #include "pub/view.h"
+#include "pub/addopt.h"
+#include "pub/area.h"
+#include "pub/plugin.h"
+#include <functional>
 
 class add___ {
 private:
-	char typ_, typ2_;
-	void *widget_ = nullptr;
-	bool has_button_, can_close_;
-
+	GtkWidget *box_ = nullptr, *box1_ = nullptr, *box2_ = nullptr, *box3_ = nullptr, *box4_ = nullptr;
 	int i_ = 0;
-	add___(char typ, char typ2) : typ_(typ), typ2_(typ2) {}
+
+	void end_1__(pub::view___ * view, pub::add_opt___* opt);
+	void pack__(GtkWidget *w, pub::area___ * area, pub::add_opt___* opt);
+	static void code__(pub::view___ * view, int i, pub::view___ * view2 = nullptr);
+	static bool tofrom__(pub::view___ *view);
 public:
-	virtual ~add___();
-	static add___* mk__(char typ, char typ2, const std::vector<std::string>& p);
+	void del__(void* w);
+	static bool mk__(const std::vector<std::string>& p, size_t from, std::vector<pub::data___>* p2);
 
-	void *widget__() {return widget_;}
-
-	static void begin__(pub::view___ * view, void* w, bool from_view = true);
-	static void end__(pub::view___ * view, bool to);
+	static bool begin__(pub::view___ * view, void* w, pub::view___ *from_view, pub::add_opt___* opt);
+	static void end__(pub::view___ * view, void* w, pub::add_opt___* opt, std::vector<std::string>* p, pub::plugin___ *p2);
+	static void end_3__(pub::view___ * view, std::vector<std::string>* p, bool is_switch);
+	static void code__(pub::view___ * view);
 
 	static pub::view___ * get_view__(const char *name, void* w);
 	static void close__(pub::view___ *);
+	static pub::view___* activa__(const std::string &name);
+	static void for_view__(void* w, std::function<bool(pub::view___*)> fn);
+
+	static bool api__(pub::view___ * view, void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret);
 };
 
 #endif /* ADD_H_ */

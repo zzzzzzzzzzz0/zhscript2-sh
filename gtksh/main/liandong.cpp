@@ -13,13 +13,6 @@
 
 #define int_no_ -10000
 
-class liandong_pian___ {
-public:
-	int x_ = 0, y_ = 0;
-	bool get_ = false;
-	void get__(window___ *w, int x, int y);
-};
-
 class liandong_data___ {
 public:
 	std::string grpname_;
@@ -124,14 +117,14 @@ void liandong_pian___::get__(window___ *w, int x, int y) {
 #endif
 }
 
-static liandong_pian___ pian_;
+liandong_pian___ liandong_pian_;
 
 void liandong_data___::no_no__(window___ *w2) {
 	if(x_ == int_no_) {
 		int x2, y2;
 		gtk_window_get_position(w2->hr__(), &x2, &y2);
-		x_ = x2 - pian_.x_;
-		y_ = y2 - pian_.y_;
+		x_ = x2 - liandong_pian_.x_;
+		y_ = y2 - liandong_pian_.y_;
 #ifdef ver_debug_
 		debug_.o__("dat_no_no__ ", w2->name__(), " ", x_, ",", y_);
 #endif
@@ -146,10 +139,10 @@ static void move__(liandong_data___ *dat, window___ *w) {
 		dat2.y_by_move_ = dat2.y_;
 #ifdef ver_debug_
 		debug_.o__("move__ ", w2->name__(), " ",
-				dat2.x_ - pian_.x_, "(", dat2.x_, "-", pian_.x_, "),",
-				dat2.y_ - pian_.y_, "(", dat2.y_, "-", pian_.y_, ")");
+				dat2.x_ - liandong_pian_.x_, "(", dat2.x_, "-", liandong_pian_.x_, "),",
+				dat2.y_ - liandong_pian_.y_, "(", dat2.y_, "-", liandong_pian_.y_, ")");
 #endif
-		gtk_window_move(w2->hr__(), dat2.x_ - pian_.x_, dat2.y_ - pian_.y_);
+		gtk_window_move(w2->hr__(), dat2.x_ - liandong_pian_.x_, dat2.y_ - liandong_pian_.y_);
 	});
 }
 
@@ -214,7 +207,7 @@ void liandong___::window_move__(window___ *w, int x, int y) {
 		dat2.x_ += xadd;
 		dat2.y_ += yadd;
 	});
-	pian_.get__(w, x, y);
+	liandong_pian_.get__(w, x, y);
 	move__(dat, w);
 }
 
@@ -237,8 +230,8 @@ void liandong___::window_resize__(window___ *w, int w_new, int w_old, int h_new,
 		if(dat2.y_ > dat->y_  + h_old /*&& dat2.x_ >= dat->x_ && dat2.x_ < dat->x_  + w_old*/)
 			dat2.y_ += hadd;
 	});
-	if(!pian_.get_)
-		pian_.get__(w, dat->x_, dat->y_);
+	if(!liandong_pian_.get_)
+		liandong_pian_.get__(w, dat->x_, dat->y_);
 	move__(dat, w);
 }
 

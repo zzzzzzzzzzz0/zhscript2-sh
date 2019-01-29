@@ -11,22 +11,23 @@
 #include <string>
 #include <vector>
 #include <initializer_list>
+#include <functional>
 
 namespace pub {
 
 class arg___ {
 public:
-	const char *tag_ = nullptr;
-	int argc_ = 1;
-	std::vector<std::string> a_;
+	std::function<void(arg___*)> fn_;
+	std::vector<std::string> tag_;
+	int argc_ = 0;
+	size_t i_, tag_i_;
 };
 
 class args___ {
-private:
-	std::vector<arg___*> a_;
 public:
-	args___(std::initializer_list<arg___*> a) : a_(a) {}
-	bool parse__(const std::vector<std::string>& p, size_t from = 0);
+	std::vector<arg___> a_;
+	args___(std::initializer_list<arg___> a) : a_(a) {}
+	int parse__(const std::vector<std::string>& p, size_t from = 0);
 };
 
 } /* namespace pub */
