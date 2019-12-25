@@ -120,7 +120,12 @@ static pub::tags___ tags_ = {
 		{"代码", " ", 1},
 		{"错代码", "E", 1},
 }, tags_page_ = {
+		{"标签提示", "T", 0},
 		{"格", "F", 1},
+		{"页宽高", "s", 0},
+		{"客区宽高", "s", 0},
+		{"敏感", "S", 0},
+		{"提示", "t", 0},
 		{"字体", "f", 1},
 		{"改id", "i", 1},
 };
@@ -131,8 +136,55 @@ void main___::api__(window___ *window, pub::view___ *view, void* shangji, const 
 		switch(tags_page_.get__(p, tag)) {
 		case 'y': {
 			switch(tag[0]) {
+			case 'T': {
+				GtkWidget *w = GTK_WIDGET(view->var__("标签"));
+				if(!w) {
+					err_.wufa__(p, SIZE_MAX);
+					return;
+				}
+				if(p.size() > 1)
+					gtk_widget_set_tooltip_markup(w, p[1].c_str());
+				else {
+					const char* s = gtk_widget_get_tooltip_markup(w);
+					if(s)
+						ret.push_back(s);
+				}
+				break; }
 			case 'F':
 				push__(view, p[1].c_str(), ret);
+				break;
+			case 's': {
+				GtkWidget *wi = view->widget__();
+				if(p.size() > 1) {
+					int w = pub::stoi__(p[1]);
+					int h = p.size() > 2 ? pub::stoi__(p[2]) : w;
+					gtk_widget_set_size_request (wi, w, h);
+				} else {
+					int w, h;
+					w = gtk_widget_get_allocated_width(wi);
+					h = gtk_widget_get_allocated_height(wi);
+					ret.push_back(std::to_string(w));
+					ret.push_back(std::to_string(h));
+					gtk_widget_get_size_request (wi, &w, &h);
+					ret.push_back(std::to_string(w));
+					ret.push_back(std::to_string(h));
+				}
+				break; }
+			case 'S':
+				if(p.size() > 1) {
+					gtk_widget_set_sensitive(view->widget__(), pub::bool__(p[1]));
+				} else {
+					ret.push_back(std::to_string(gtk_widget_get_sensitive(view->widget__())));
+				}
+				break;
+			case 't':
+				if(p.size() > 1)
+					gtk_widget_set_tooltip_markup(view->widget__(), p[1].c_str());
+				else {
+					const char* s = gtk_widget_get_tooltip_markup(view->widget__());
+					if(s)
+						ret.push_back(s);
+				}
 				break;
 			case 'f': {
 				PangoFontDescription *font_desc = pango_font_description_from_string (p[1].c_str());
@@ -213,7 +265,7 @@ void main___::api__(window___ *window, pub::view___ *view, void* shangji, const 
 			v = opt.first_no_ || !pi ? nullptr : pi->p_->new_view__();
 			switch(tag[0]) {
 			case 'c':
-				window_ = new window___(opt.is_app_paintable_, true);
+				window_ = (window___*)add___::new_window__(&opt, true);
 				w = window_;
 				if(!add___::begin__(v, window_, nullptr, &opt)) {
 					delete window_;
@@ -339,9 +391,9 @@ bool main___::for_plugin__(const std::string &path) {
 				return false;
 			}
 			{
-				using get_plugin___ = pub::plugin___ *(*)(const std::string &);
+				using get_plugin___ = pub::plugin___ *(*)(const std::string &, const std::string &);
 				get_plugin___ f = reinterpret_cast<get_plugin___>(pi->dl_.get_func__("plugin__"));
-				pi->p_ = f(so);
+				pi->p_ = f(so, l4_.path_);
 			}
 			size_t i1 = so.rfind('/') + 1;
 			size_t i2 = so.find('.', i1);
@@ -389,7 +441,7 @@ int main___::main__(int argc, char* argv[]) {
 	}
 	gtk_init(&argc, &argv);
 	std::string path = argv[0];
-	if(!l4_.init__("", argc, argv, path))
+	if(!l4_.init2__("", argc, argv, path))
 		return -1;
 	qu_ = l4_.new_main_qu__();
 	err2_.jieshi__ = std::bind(&main___::jieshi__, this, _p::_1, nullptr, qu_, false, nullptr, nullptr);
@@ -412,6 +464,7 @@ int main___::main__(int argc, char* argv[]) {
 	pub::ext_->add_end__ = add___::end__;
 	pub::ext_->close__ = add___::close__;
 	pub::ext_->view__ = area___::view__;
+	pub::ext_->get_view__ = util___::get_view__;
 	pub::ext_->push__ = push__;
 	pub::ext_->wait__ = wait__;
 
@@ -462,7 +515,6 @@ static void push__(va_list &argv, std::vector<std::string> &p) {
 static void push_end__(int argc, va_list &argv, std::vector<std::string> &p) {
 	for (int i = 0; i < argc; ++i)
 		push__(argv, p);
-	va_end(argv);
 }
 
 static void suidao__(void *ret, void* shangji,main___* plugin, window___ *w, pub::view___ *v, std::vector<pub::data___>* p2, int argc,...) {
@@ -472,6 +524,7 @@ static void suidao__(void *ret, void* shangji,main___* plugin, window___ *w, pub
 	va_list argv;
 	va_start(argv, argc);
 	push_end__(argc, argv, p);
+	va_end(argv);
 	for(auto i = p.begin(); i != p.end();) {
 		const std::string& s = *i;
 		if(i == p.begin() && s[0] == '#') {
@@ -506,6 +559,7 @@ static void suidao2__(void *ret, void* shangji,main___* plugin, int argc,...) {
 	va_list argv;
 	va_start(argv, argc);
 	push_end__(argc, argv, p);
+	va_end(argv);
 	{
 		std::string tname;
 		if(util___::for_name__(p[0], w, tname))

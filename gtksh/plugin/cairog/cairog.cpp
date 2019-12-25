@@ -29,9 +29,24 @@ bool cairog___::api__(void* shangji, const std::vector<std::string>& p, std::vec
 		case 's':
 			switch(tag[1]) {
 			case 'p': {
-				cairo_surface_t *img = cairo_image_surface_create_from_png(p[1].c_str());
-				imgs_.push_back(img);
-				ret.push_back(std::to_string((long)img));
+				cairo_surface_t *img;
+				if(p.size() == 2)
+					img = cairo_image_surface_create_from_png(p[1].c_str());
+				else
+					img = (cairo_surface_t *)pub::stoul__(p[1]);
+				if(!img) {
+					pub::ext_->buzhichi__(p, 1);
+					return true;
+				}
+				if(p.size() == 2) {
+					imgs_.push_back(img);
+					ret.push_back(std::to_string((long)img));
+				} else {
+					const std::string& opt = p[2];
+					     if(opt == "宽") ret.push_back(std::to_string(cairo_image_surface_get_width(img)));
+					else if(opt == "高") ret.push_back(std::to_string(cairo_image_surface_get_height(img)));
+					else return false;
+				}
 				break; }
 			case 'g': {
 				gif_surface___ *g;
@@ -80,4 +95,4 @@ cairog___::~cairog___() {
 }
 
 static cairog___ plugin_;
-extern "C" void *plugin__(const std::string &path) {return &plugin_;}
+extern "C" void *plugin__(const std::string &path, const std::string &l4_so) {return &plugin_;}

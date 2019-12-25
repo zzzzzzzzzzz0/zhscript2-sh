@@ -42,6 +42,7 @@ public:
 	void (*add_end__)(view___ *, void* w, add_opt___*, std::vector<std::string>*, plugin___*) = nullptr;
 	void (*close__)(view___ *) = nullptr;
 	view___ *(*view__)(void *) = nullptr;
+	view___* (*get_view__)(const std::string& name1, unsigned long id2) = nullptr;
 	void (*push__)(view___*, const char*, std::vector<std::string>&) = nullptr;
 	bool (*wait__)(const char* s) = nullptr;
 };

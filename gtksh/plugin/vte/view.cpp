@@ -64,6 +64,7 @@ static void cmd__(const std::vector<std::string>& p, size_t from, VteTerminal* h
 
 static pub::tags___ tags_ = {
 		{"插入", "i", 1},
+		{"文字", "f", 1},
 		{"复制", "c", 0},
 		{"粘贴", "v", 0},
 		{"选择", "s", 0},
@@ -88,7 +89,16 @@ bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vecto
 			//if(!ins_init__(data.c_str()))
 				ins__(data);
 			break; }
-		case 'c': vte_terminal_copy_clipboard(hr__()); break;
+		case 'f': {
+			const std::string& data = p[1];
+			vte_terminal_feed(hr__(), data.c_str(), data.length());
+			break; }
+		case 'c':
+			if(vte_terminal_get_has_selection(hr__())) {
+				vte_terminal_copy_clipboard(hr__());
+				ret.push_back("1");
+			}
+			break;
 		case 'v': vte_terminal_paste_clipboard(hr__()); break;
 		case 's': {
 			GArray *attr = g_array_new(FALSE, FALSE, sizeof(VteCharAttributes));

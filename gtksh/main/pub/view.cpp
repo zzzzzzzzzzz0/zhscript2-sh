@@ -9,12 +9,16 @@
 #include "tag.h"
 #include "ext.h"
 #include "util.h"
+#include "eventget.h"
 
 namespace pub {
 
-static pub::tags___ tags_ = {
+static event_get___ event_get_;
+
+static tags___ tags_ = {
 		{"参", "p", 0},
 		{"变量", "v", 1},
+		{"事件", "e", 0},
 };
 
 bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vector<data___>* p2, std::vector<std::string>& ret) {
@@ -38,6 +42,13 @@ bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vecto
 			break;
 		case 'v':
 			var__(p, ret);
+			break;
+		case 'e':
+			switch(event_get_.api__(p, object__())) {
+			case '<':
+				ext_->buzu__(p, SIZE_MAX);
+				return true;
+			}
 			break;
 		}
 		return true;

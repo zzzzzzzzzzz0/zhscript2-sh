@@ -100,9 +100,7 @@ static void run_js__(WebKitWebView *wv, const char* s, pub::user_data1___* ud) {
 }
 
 static void cb_resource_load_started__(WebKitWebView *web_view, WebKitWebResource *resource, WebKitURIRequest *request, gpointer user_data) {
-	const gchar* uri = webkit_uri_request_get_uri(request);
-	//g_message("%s", uri);
-	pub::ext_->jieshi22__(user_data, "s", uri);
+	pub::ext_->jieshi22__(user_data, "s", webkit_uri_request_get_uri(request));
 }
 
 static void cb_mouse_target_changed__(WebKitWebView *webView, WebKitHitTestResult *hitTestResult, guint mouseModifiers, gpointer user_data) {
@@ -140,6 +138,7 @@ static pub::tags___ tags_ = {
 		{"背景色", "B", 1},
 		{"禁js", "J", 0},
 		{"ua", "@", 0},
+		{"缓存", "C", 0},
 		{"配置", "S", 0},
 		{"侦听", "z", 0},
 };
@@ -241,6 +240,10 @@ bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vecto
 			else
 				ret.push_back(webkit_settings_get_user_agent(set__()));
 			break;
+		case 'C': {
+			WebKitWebsiteDataManager *wdm = webkit_web_view_get_website_data_manager(hr__());
+			ret.push_back(webkit_website_data_manager_get_disk_cache_directory(wdm));
+			break; }
 		case 'S': {
 			void *wws = webkit_web_view_get_settings(hr__());
 			char type = 's';
@@ -301,16 +304,26 @@ void view___::add_end__(bool is_switch) {
 		code_.clear();
 #endif
 }
+bool view___::is__(const std::string& name1, unsigned long id2) {
+	return name1 == plugin_->name_ && id2 == webkit_web_view_get_page_id (hr__());
+}
 
 static std::string add_zs_ = "window.z$=function(){" \
-		"if(arguments.length==0)return;" \
-		"var arg='';" \
-		"for(var i=1;i<arguments.length;i++){" \
-		"if(i>1)arg+='、';" \
-		"arg+='下原样'+arguments[i]+'上原样';" \
-		"}" \
-		"return eval(prompt('zhscript:'+arguments[0],arg));" \
-		"};";
+	"if(arguments.length==0)return;" \
+	"var f=function(i,o){" \
+		"var p='';" \
+		"if(i>1)p+='、';" \
+		"if(Array.isArray(o)){" \
+			"for(var i2=0;i2<o.length;i2++)" \
+				"p+=f(i2+1,o[i2]);" \
+		"}else p+='下原样'+o+'上原样';" \
+		"return p;" \
+	"};" \
+	"var p='';" \
+	"for(var i=1;i<arguments.length;i++)" \
+		"p+=f(i,arguments[i]);" \
+	"return eval(prompt('zhscript:'+arguments[0],p));" \
+"};";/**/
 
 #ifdef ver_u1704_
 static gboolean idle_code__(gpointer user_data) {
@@ -319,7 +332,7 @@ static gboolean idle_code__(gpointer user_data) {
 	pub::ext_->jieshi__(nullptr, v, v->code_.c_str(), nullptr, nullptr, false, nullptr, nullptr, &ret);
 	//const gchar *content, *base_uri
 	webkit_web_view_load_html(v->hr__(),
-			("<script>" + add_zs_ + "</script>" + (ret.size() > 0 ? ret[0] : "")).c_str(),
+			("<script>" + add_zs_ + "</script>" +/**/ (ret.size() > 0 ? ret[0] : "")).c_str(),
 			ret.size() > 1 ? ret[1].c_str() : "file:///");
 	return G_SOURCE_REMOVE;
 }
@@ -345,7 +358,6 @@ void view___::load_uri__(const std::string &url) {
 }
 
 static gboolean cb_close__(WebKitWebView* webView, gpointer user_data) {
-	//g_message("Closing Web View");
 	pub::sign___* sign = (pub::sign___*)user_data;
 	view___* view = (view___*)sign->data_;
 	pub::ext_->jieshi2__(view, sign->sig_->name_);
@@ -362,7 +374,7 @@ static void cb_load_changed__(WebKitWebView  *web_view, WebKitLoadEvent load_eve
 		break;
 	default:
 		break;
-	}
+	}/**/
 	const char* s = nullptr;
 	switch (load_event) {
 	case WEBKIT_LOAD_STARTED:    s = "始"; break;
@@ -460,8 +472,8 @@ static gboolean cb_script_dialog__ (WebKitWebView  *web_view, WebKitScriptDialog
 			}
 			webkit_script_dialog_prompt_set_text(dialog, ret2.c_str());
 			return true;
-		} else
-			pub::ext_->jieshi2__(v, sign->sig_->name_, "sss", "提问", s, s2);
+		}
+		pub::ext_->jieshi2__(v, sign->sig_->name_, "sss", "提问", s, s2);
 		break; }
 	case WEBKIT_SCRIPT_DIALOG_BEFORE_UNLOAD_CONFIRM:
 		break;

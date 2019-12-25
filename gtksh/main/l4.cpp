@@ -6,12 +6,9 @@
  */
 
 #include "l4.h"
-
-#include "l4.h"
-#include <dlfcn.h>
 #include <sys/stat.h>
-#include "err.h"
 #include <unistd.h>
+#include "err.h"
 
 bool exists__(const char *filename) {
 	struct stat st;
@@ -55,7 +52,7 @@ bool realpath2__(std::string &path) {
 	return false;
 }
 
-bool l4___::load__(const char* path, std::string &path3, std::string &path1, std::string &path11) {
+bool l4___::path__(const char* path, std::string &path3, std::string &path1, std::string &path11) {
 	std::string path2 = path;
 	if(path2.rfind('/') == std::string::npos) {
 		if(realpath2__(path2)) {
@@ -94,70 +91,19 @@ bool l4___::load__(const char* path, std::string &path3, std::string &path1, std
 		if(exists__(path3.c_str()))
 			break;
 	}
-	return dl_.load__(path3.c_str());
-}
-
-bool dl___::load__(const char* path) {
-	dl_ = dlopen(path, RTLD_LAZY);
-	if(dlerr__())
-		return false;
 	return true;
 }
 
-bool dl___::dlerr__() {
-	const char *err = dlerror();
-	if(err) {
-		err_.o__(err);
-		return true;
-	}
-	return false;
-}
-
-void* dl___::get_func__(const char* name) {
-	void* v = dlsym(dl_, name);
-	return dlerr__() ? nullptr : v;
-}
-#define get_func2__(n,p)	\
-	if(!(n = (p)dl_.get_func__(#n)))	\
-		return false;
-#define get_func3__(n,p)	\
-	if(!(n = (p)dl_.get_func__("l4_" # n)))	\
-		return false;
-bool l4___::get_funcs__() {
-	get_func2__(l4_new__,void*(*)());
-	get_func2__(l4_delete__,void(*)(void*));
-	get_func2__(l4_set_path__,void (*)(void*,const char*));
-	get_func2__(l4_cmdline_parse__, void(*)(void*, int, const char**));
-	get_func2__(l4_cmdline_parse2__, void (*)(void*, const char*));
-	get_func2__(l4_has_src__, bool (*)(void*));
-	get_func2__(l4_exit_code__, int (*)(void*));
-	get_func2__(l4_is_end__, bool (*)(void*));
-	get_func2__(l4_jieshi3__,bool (*)(void*,void*, void*));
-	get_func2__(l4_new_main_qu__,void* (*)(void*));
-	get_func2__(mk_suidao__, void (*)(void *qv, const char *name, unsigned long fnaddr, bool use_a, unsigned argc, ...));
-	get_func2__(l4_jieshi4__,bool (*)(void*,const char*,bool,const char*,void*,int,const char**, void*));
-	get_func2__(ret_push__, void (*)(void *ret, const char *s, bool one));
-	get_func2__(l4_err__, const char* (*)(void*));
-	get_func2__(l4_err_clear__, void (*)(void*));
-	get_func2__(l4_new_var__, bool (*)(void*, void*, const char*, const char*));
-	get_func2__(l4_new_def__, bool (*)(void*, void*, const char*, const char*, size_t, size_t, bool, bool));
-	get_func2__(l4_new_alias__, bool (*)(void*, void*, const char*, const char*));
-	get_func3__(new_qu__, void* (*)(void* shangji));
-	get_func3__(delete_qu__, void (*)(void* qu));
-	get_func3__(on_exit__, void (*)(void(*)(const char*)));
-	return true;
-}
-
-bool l4___::init__(const char* line1, int argc, char* argv[], std::string &path1) {
-	std::string path, path2 = path1;
-	if(!load__(argv[0], path, path1, path2)) {
-		err_.o__("找不到", path);
+bool l4___::init2__(const char* line1, int argc, char* argv[], std::string &path1) {
+	std::string path2 = path1;
+	if(!path__(argv[0], path_, path1, path2)) {
+		err_.o__("找不到", path_);
 		return false;
 	}
-	if(!get_funcs__())
+	if(!init__(path_.c_str())) {
+		err_.o__(dl_.err_);
 		return false;
-	lib_ = l4_new__();
-	l4_set_path__(lib_, path.c_str());
+	}
 	std::string line = line1;
 	bool ex = false;
 	for(;;) {
@@ -185,28 +131,14 @@ bool l4___::init__(const char* line1, int argc, char* argv[], std::string &path1
 		line += " \"" + path2 + "\"";
 	}
 	//debug_.o__(line);
-	l4_cmdline_parse2__(lib_, line.c_str());
-	l4_cmdline_parse__(lib_, argc, (const char**)argv);
+	parse__(line.c_str());
+	parse__(argc, (const char**)argv);
 	return true;
-}
-void l4___::uninit__() {
-	if(lib_) {
-		l4_delete__(lib_);
-		lib_ = nullptr;
-	}
-}
-
-dl___::~dl___() {
-	if(dl_) {
-		dlclose(dl_);
-		dl_ = nullptr;
-	}
 }
 
 l4___::l4___() {
 }
 
 l4___::~l4___() {
-	uninit__();
 }
 

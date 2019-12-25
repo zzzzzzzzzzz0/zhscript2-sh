@@ -10,7 +10,13 @@
 #include "pub/util.h"
 
 GtkNotebook *area___::nb__() {
-	return GTK_NOTEBOOK(GTK_WIDGET(widget_));
+	if(widget_.size())
+		return GTK_NOTEBOOK(GTK_WIDGET(widget_[0]));
+	return nullptr;
+}
+
+static GtkWidget *w__(GtkWidget *w) {
+	return w;
 }
 
 static GtkWidget *sw__(GtkWidget *w, pub::add_opt___* opt) {
@@ -23,7 +29,7 @@ static GtkWidget *sw__(GtkWidget *w, pub::add_opt___* opt) {
 		gtk_scrolled_window_set_min_content_width(sw1, opt->w_req_);
 	if(opt->h_req_ >= 0)
 		gtk_scrolled_window_set_min_content_height(sw1, opt->h_req_);*/
-	return sw;
+	return w__(sw);
 }
 
 void area___::pack__(GtkWidget *box, char pos, pub::add_opt___* opt, GtkWidget *w) {
@@ -33,16 +39,16 @@ void area___::pack__(GtkWidget *box, char pos, pub::add_opt___* opt, GtkWidget *
 		if(opt->w_req_ >= 0 || opt->h_req_ >= 0)
 			gtk_box_pack_start(box2,sw__(w, opt),true,true,0);
 		else
-			gtk_box_pack_start(box2,w,FALSE,FALSE,0);
+			gtk_box_pack_start(box2,w__(w),FALSE,FALSE,0);
 		break;
 	case 'T': case 'B': case 'L': case 'R':
 		if(opt->w_req_ >= 0 || opt->h_req_ >= 0)
 			gtk_box_pack_end(box2,sw__(w, opt),true,true,0);
 		else
-			gtk_box_pack_end(box2,w,FALSE,FALSE,0);
+			gtk_box_pack_end(box2,w__(w),FALSE,FALSE,0);
 		break;
 	default:
-		gtk_box_pack_end(box2,w,true,true,0);
+		gtk_box_pack_end(box2,w__(w),true,true,0);
 		break;
 	}
 }
@@ -166,13 +172,15 @@ void area___::view__(const char *name, window___* window, std::function<void(pub
 		name1 = name;
 	for__(window, [&](area___* area) {
 		switch(area->opt_.typ_) {
-		default: {
-			pub::view___* view = view__(area->widget_);
-			if(view && (name1.empty() || name1 == view->name__())) {
-				ret = view;
-				fn(ret);
+		default:
+			for(auto i : area->widget_) {
+				pub::view___* view = view__(i);
+				if(view && (name1.empty() || name1 == view->name__())) {
+					ret = view;
+					fn(ret);
+				}
 			}
-			break; }
+			break;
 		case 'n': {
 			GtkNotebook *nb = area->nb__();
 			if(name1.empty()) {

@@ -22,10 +22,11 @@ private:
 	void end_1__(pub::view___ * view, pub::add_opt___* opt);
 	void pack__(GtkWidget *w, pub::area___ * area, pub::add_opt___* opt);
 	static void code__(pub::view___ * view, int i, pub::view___ * view2 = nullptr);
-	static bool tofrom__(pub::view___ *view);
+	static bool tofrom__(pub::view___ *view, bool b);
 public:
 	void del__(void* w);
 	static bool mk__(const std::vector<std::string>& p, size_t from, std::vector<pub::data___>* p2);
+	static void* new_window__(pub::add_opt___* opt, bool is_main = false);
 
 	static bool begin__(pub::view___ * view, void* w, pub::view___ *from_view, pub::add_opt___* opt);
 	static void end__(pub::view___ * view, void* w, pub::add_opt___* opt, std::vector<std::string>* p, pub::plugin___ *p2);

@@ -14,6 +14,8 @@
 class window___ : public pub::base___ {
 private:
 	void *add_ = nullptr;
+	GdkCursor *cursor_ = nullptr;
+	void stoi__(const std::vector<std::string>& p, int& x, int& y, int* out_x = nullptr, int* out_y = nullptr);
 protected:
 	bool is_main_;
 public:
@@ -25,6 +27,7 @@ public:
 	virtual ~window___();
 
 	GtkWindow *hr__() {return GTK_WINDOW(hr_);}
+	GdkWindow *hr2__() {return gtk_widget_get_window(hr_);}
 	GtkContainer *container__() {return GTK_CONTAINER (hr_);}
 	bool is_main__() {return is_main_;}
 	void *add__() {return add_;}

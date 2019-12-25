@@ -9,7 +9,10 @@
 #include <map>
 #include <vector>
 #include <functional>
+#include <algorithm>
 #include "err.h"
+
+//#define ver_liandong_wg_
 
 #define int_no_ -10000
 
@@ -31,8 +34,36 @@ static liandong_data___ *liandong_data__(window___ *w) {
 }
 
 class liandong_data2___ {
-public:
+private:
+#ifdef ver_liandong_wg_
+	GtkWindowGroup *wg_ = nullptr;
+#endif
 	std::vector<window___*> a_;
+public:
+	liandong_data2___() {
+#ifdef ver_liandong_wg_
+		wg_ = gtk_window_group_new ();
+#endif
+	}
+	void add__(window___ *w) {
+		a_.push_back(w);
+#ifdef ver_liandong_wg_
+		gtk_window_group_add_window (wg_, w->hr__());
+#endif
+	}
+	void del__(window___ *w) {
+		a_.erase(std::find(a_.begin(), a_.end(), w));
+#ifdef ver_liandong_wg_
+		gtk_window_group_remove_window (wg_, w->hr__());
+#endif
+	}
+	bool for__(std::function<bool(window___ *, liandong_data2___*)> fn) {
+		for(auto i : a_) {
+			if(fn(i, this))
+				return true;
+		}
+		return false;
+	}
 };
 
 static std::map<std::string, liandong_data2___> grp_;
@@ -40,20 +71,21 @@ static std::map<std::string, liandong_data2___> grp_;
 void liandong___::add__(window___ *w, const std::string &grpname) {
 	liandong_data___ &dat = map_[w];
 	dat.grpname_ = grpname;
-	grp_[grpname].a_.push_back(w);
+	grp_[grpname].add__(w);
 }
 
 void liandong___::del__(window___ *w) {
 	auto i = map_.find(w);
 	if(i == map_.end())
 		return;
-	std::vector<window___*> &a = grp_[i->second.grpname_].a_;
-	map_.erase(i);
-	for(auto i2 = a.begin(); i2 != a.end(); i2++)
-		if(*i2 == w) {
-			a.erase(i2);
-			break;
+	grp_[i->second.grpname_].for__([&](window___ *w2, liandong_data2___* d2) {
+		if(w2 == w) {
+			d2->del__(w);
+			return true;
 		}
+		return false;
+	});
+	map_.erase(i);
 }
 
 static bool for_grp__(liandong_data___ *dat, window___ *w, std::function<void(liandong_data___ &,window___ *,bool&)> fn) {
@@ -62,17 +94,17 @@ static bool for_grp__(liandong_data___ *dat, window___ *w, std::function<void(li
 		if(!dat)
 			return false;
 	}
-	for(auto i : grp_[dat->grpname_].a_) {
-		auto i2 = map_.find(i);
+	if(grp_[dat->grpname_].for__([&](window___ *w2, liandong_data2___* d2) {
+		auto i2 = map_.find(w2);
 		if(i2 == map_.end())
-			continue;
-		if(i == w)
-			continue;
-		bool b = false;
-		fn(i2->second, i, b);
-		if(b)
 			return false;
-	}
+		if(w2 == w)
+			return false;
+		bool b = false;
+		fn(i2->second, w2, b);
+		return b;
+	}))
+		return false;
 	return true;
 }
 

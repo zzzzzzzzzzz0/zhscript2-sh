@@ -10,6 +10,7 @@
 
 #include "pub/view.h"
 #include "webkit.h"
+#include <webkit2/webkit2.h>
 
 class view___: public pub::view___ {
 public:
@@ -22,6 +23,7 @@ public:
 	bool api__(void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret);
 	void new_open__(const std::vector<std::string>& p);
 	void add_end__(bool is_switch);
+	bool is__(const std::string& name1, unsigned long id2);
 
 #ifdef ver_u1704_
 	std::string code_;

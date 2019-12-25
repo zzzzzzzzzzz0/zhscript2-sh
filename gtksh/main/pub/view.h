@@ -39,6 +39,8 @@ public:
 	void init2__(int by);
 	bool has_init__() {return init_;}
 	int init2_by__() {return init2_by_;}
+
+	virtual bool is__(const std::string& name1, unsigned long id2) {return false;}
 };
 
 } /* namespace pub */

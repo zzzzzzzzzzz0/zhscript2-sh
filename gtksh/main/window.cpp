@@ -17,51 +17,68 @@
 #include "liandong.h"
 static liandong___ liandong_;
 
-static void x__(int &x, bool no, bool is) {
-	if(x<0) {
-		if(no)
-			x = 0;
-		else {
-			int w = is ? gdk_screen_width() : gdk_screen_height();
-			if(x + w > 0)
-				x += w;
-			else {
-			}
+#include "pub/eventget.h"
+static pub::event_get___ event_get_;
+
+static void x__(int &x, int no, int i_x, int* out, bool is, int w2) {
+	int w = is ? gdk_screen_width() : gdk_screen_height();
+	int max = w - w2;
+	if(out) {
+		if(x < 0) *out = x;
+		//else if(x >= w) *out = x - w + 1;
+		else if(x > max) *out = x - max;
+	}
+	switch(no) {
+	case 2: {
+		if(x >= max) {
+			x = max;
+			return;
 		}
+		break; }
+	}
+	if(x >= 0) {
+		return;
+	}
+	switch(no) {
+	case 1: case 2:
+		x = 0;
+	case -1:
+		return;
+	}
+	switch(no) {
+	case -2:
+		x = (w + x) / i_x;
+		return;
+	}
+	if(x + w > 0) {
+		x += w;
+		return;
 	}
 }
-static void stoi__(const std::vector<std::string>& p, int& x, int& y) {
+void window___::stoi__(const std::vector<std::string>& p, int& x, int& y, int* out_x, int* out_y) {
 	x = pub::stoi__(p[1], x);
 	y = p.size() > 2 ?
 		pub::stoi__(p[2], y) : x;
-	x__(x, p.size() > 3, true);
-	x__(y, p.size() > 3, false);
-}
-
-class event___ {
-public:
-	std::string code_, name_;
-	gboolean b_;
-};
-static gboolean event_mouse__(GtkWidget *widget, GdkEventButton *event, gpointer data) {
-	event___* e = (event___*)data;
-	pub::ext_->jieshi23__(e->code_.c_str(), e->name_.c_str(), nullptr, "ldd", event->button, event->x, event->y);
-	return e->b_;
-}
-static gboolean event_key__(GtkWidget *widget, GdkEventKey *event, gpointer data) {
-	event___* e = (event___*)data;
-	pub::ext_->jieshi23__(e->code_.c_str(), e->name_.c_str(), nullptr, "s", gdk_keyval_name(event->keyval));
-	return e->b_;
-}
-static gboolean event_scroll__(GtkWidget *widget, GdkEventScroll *scroll, gpointer data) {
-	event___* e = (event___*)data;
-	pub::ext_->jieshi23__(e->code_.c_str(), e->name_.c_str(), nullptr, "l", scroll->direction);
-	return e->b_;
-}
-static gboolean event_other__(GtkWidget *widget, GdkEvent *event, gpointer data) {
-	event___* e = (event___*)data;
-	pub::ext_->jieshi23__(e->code_.c_str(), e->name_.c_str());
-	return e->b_;
+	int no_x = 0, no_y = 0, i_x = 0, i_y = 0;
+	switch(p.size()) {
+	case 4:
+		no_x = no_y = p[3].empty() ? 1 : (p[3] == "2" ? pub::stoi__(p[3]) : -1);
+		break;
+	case 5:
+		if(!p[3].empty()) {
+			no_x = -2;
+			i_x = pub::stoi__(p[3]);
+		}
+		if(!p[4].empty()) {
+			no_y = -2;
+			i_y = pub::stoi__(p[4]);
+		}
+		if(i_x <= 0) i_x = 1;
+		if(i_y <= 0) i_y = 1;
+		break;
+	}
+	x__(x, no_x, i_x, out_x, true, width_);
+	x__(y, no_y, i_y, out_y, false, height_);
 }
 
 static pub::tags___ tags_ = {
@@ -72,18 +89,23 @@ static pub::tags___ tags_ = {
 		{"隐藏", "h", 0},
 		{"居中", "c", 0},
 		{"最大化", "A", 0},
-		{"最小化", "I", 0},
+		{"最小化", "I1", 0},
+		{"取消最小化", "I", 0},
 		{"大小", "s", 0},
 		{"宽高", "s", 0},
-		{"客区宽高", "sc", 0},
+		{"预宽高", "sd", 0},
+		{"定宽高", "sr", 0},
 		{"置顶", "T1", 0},
 		{"取消置顶", "T", 0},
 		{"置底", "B1", 0},
 		{"取消置底", "B", 0},
+		{"总可见"/*粘滞*/, "D1", 0},
+		{"取消总可见", "D", 0},
 		{"所有桌面", "D1", 0},
 		{"取消所有桌面", "D", 0},
 		{"全屏", "F1", 0},
 		{"取消全屏", "F", 0},
+		{"光标形状", "^", 0},
 		{"窗句柄", "H", 0},
 		{"xid", "X", 0},
 		{"关闭", "x", 0},
@@ -92,8 +114,15 @@ static pub::tags___ tags_ = {
 		{"联动", "-", 1},
 		{"修饰宽高", "[", 0},
 		{"类名", "C", 1},
+		{"禁宽高", "!s", 0}, //最大化按钮去
+		{"禁关闭", "!x", 0},
+		{"不在任务栏", "!t", 0},
+		{"不透明度", "!o", 1},
+		{"鼠标穿透", "!m", 0},
+		{"只有关闭钮", "!X", 0},
+		{"无标题栏", "!T", 0},
 		{"无修饰", "d", 0},
-		{"事件", "e", 0},
+		{"窗事件", "e", 0},
 };
 
 bool window___::api__(void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret) {
@@ -105,7 +134,21 @@ bool window___::api__(void* shangji, const std::vector<std::string>& p, std::vec
 			int x, y;
 			gtk_window_get_position(hr__(), &x, &y);
 			if(p.size() > 1) {
-				stoi__(p, x, y);
+				int out_x = 0, out_y = 0;
+				stoi__(p, x, y, &out_x, &out_y);
+				switch(p.size()) {
+				case 4: {
+					const std::string& s = p[3];
+					if(s[0] == '0' && (out_x != 0 || out_y != 0)) {
+						std::vector<std::string> p3, p4;
+						p4.push_back(std::to_string(out_x));
+						p4.push_back(std::to_string(out_y));
+						pub::ext_->jieshi__(this, nullptr, s.substr(1).c_str(), nullptr, nullptr, false, &p4, nullptr, &p3);
+						if(pub::bool__(p3, 0, false))
+							return true;
+					}
+					break; }
+				}
 				gtk_window_move(hr__(), x, y);
 			} else {
 				ret.push_back(std::to_string(x));
@@ -142,34 +185,37 @@ bool window___::api__(void* shangji, const std::vector<std::string>& p, std::vec
 			gtk_window_set_position(hr__(),GTK_WIN_POS_CENTER);
 			break;
 		case 'A': gtk_window_maximize (hr__()); break;
-		case 'I': gtk_window_iconify (hr__()); break;
-		case 's':
-			switch(tag[1]) {
-			default: {
-				gint w, h;
-				gtk_window_get_size (hr__(), &w, &h);
-				if(p.size() > 1) {
-					stoi__(p, w, h);
-					//gtk_window_set_default_size (hr_, w, h);
-					gtk_window_resize(hr__(), w, h);
-				} else {
-					ret.push_back(std::to_string(w));
-					ret.push_back(std::to_string(h));
-					gtk_window_get_default_size (hr__(), &w, &h);
-					ret.push_back(std::to_string(w));
-					ret.push_back(std::to_string(h));
-				}
-				break; }
-			case 'c': {
-				pub::view___* v = add___::get_view__(nullptr, this);
-				if(v) {
-					GtkWidget *w2 = v->widget__();
-					ret.push_back(std::to_string(gtk_widget_get_allocated_width(w2)));
-					ret.push_back(std::to_string(gtk_widget_get_allocated_height(w2)));
-				}
-				break; }
-			}
+		case 'I':
+#ifdef ver_debug_
+			debug_.o__(tag, " ", name__(), " ", p[0]);
+#endif
+			if(tag[1]) gtk_window_iconify (hr__());
+			else     gtk_window_deiconify (hr__());
 			break;
+		case 's': {
+			gint w, h;
+			gtk_window_get_size (hr__(), &w, &h);
+			if(p.size() > 1) {
+				stoi__(p, w, h);
+				switch(tag[1]) {
+				default:
+					gtk_window_resize(hr__(), w, h);
+					break;
+				case 'd':
+					gtk_window_set_default_size (hr__(), w, h);
+					break;
+				case 'r':
+					gtk_widget_set_size_request (hr_, w, h);
+					break;
+				}
+			} else {
+				ret.push_back(std::to_string(w));
+				ret.push_back(std::to_string(h));
+				gtk_window_get_default_size (hr__(), &w, &h);
+				ret.push_back(std::to_string(w));
+				ret.push_back(std::to_string(h));
+			}
+			break; }
 		case 'T':
 			gtk_window_set_keep_above (hr__(), tag[1]);
 			break;
@@ -188,11 +234,34 @@ bool window___::api__(void* shangji, const std::vector<std::string>& p, std::vec
 			else
 				gtk_window_unfullscreen(hr__());
 			break;
+		case '^':
+			if(cursor_) {
+				gdk_cursor_unref(cursor_);
+			}
+			if(p.size() > 1) {
+				const std::string& p2 = p[1];
+				int i;
+				if(p2 == "移动")
+					i = GDK_FLEUR;
+				else if(sscanf(p2.c_str(), "%d", &i) != 1) {
+					err_.buzhichi__(p);
+					return true;
+				}
+				cursor_ = gdk_cursor_new((GdkCursorType)i);
+				if(!cursor_) {
+					err_.buzhichi__(p);
+					return true;
+				}
+			} else {
+				cursor_ = NULL;
+			}
+			gdk_window_set_cursor(hr2__(), cursor_);
+			break;
 		case 'H':
 			ret.push_back(std::to_string((unsigned long)hr_));
 			break;
 		case 'X':
-			ret.push_back(std::to_string(GDK_WINDOW_XID(gtk_widget_get_window(hr_))));
+			ret.push_back(std::to_string(GDK_WINDOW_XID(hr2__())));
 			break;
 		case 'x':
 			this->destroy__();
@@ -217,6 +286,36 @@ bool window___::api__(void* shangji, const std::vector<std::string>& p, std::vec
 			ret.push_back(std::to_string(liandong_pian_.x_));
 			ret.push_back(std::to_string(liandong_pian_.y_));
 			break; }
+		case '!':
+			switch(tag[1]) {
+			case 't':
+				gtk_window_set_skip_taskbar_hint(hr__(), true);
+				break;
+			case 'o':
+				gtk_window_set_opacity(hr__(), std::stof(p[1]));
+				break;
+			case 'm': {
+				cairo_region_t *r = cairo_region_create();
+				gtk_widget_input_shape_combine_region (widget__(), r);
+				cairo_region_destroy(r);
+				break; }
+			case 's':
+				gtk_window_set_resizable(hr__(), false);
+				break;
+			case 'x':
+				gtk_window_set_deletable(hr__(), false);
+				break;
+			case 'X':
+				gtk_window_set_type_hint(hr__(), GDK_WINDOW_TYPE_HINT_UTILITY);
+				break;
+			case 'T':
+				gtk_window_set_type_hint(hr__(), GDK_WINDOW_TYPE_HINT_DIALOG);
+				break;
+			}
+			break;
+		case 'd':
+			gtk_window_set_decorated(hr__(), !pub::bool__(p, 1, true));
+			break;
 		case '-':
 			liandong_.add__(this, p[1]);
 			break;
@@ -225,41 +324,13 @@ bool window___::api__(void* shangji, const std::vector<std::string>& p, std::vec
 			const std::string& cc = p[p.size() > 2 ? 2 : 1];
 			gtk_window_set_wmclass(hr__(), cn == null_ ? NULL : cn.c_str(), cc == null_ ? NULL : cc.c_str());
 			break; }
-		case 'd':
-			gtk_window_set_decorated(hr__(), !pub::bool__(p, 1, true));
-			break;
-		case 'e': {
-			for(size_t i2 = 1; i2 < p.size();) {
-				const std::string& p2 = p[i2++];
-				if(i2 >= p.size()) {
-					err_.buzu__(p);
-					return true;
-				}
-				const std::string& p3 = p[i2++];
-				event___* e = new event___();
-				e->code_ = p3;
-				e->name_ = p2;
-				e->b_ = TRUE;
-				std::string head = "key";
-				if(p2.compare(0, head.size(), head) == 0) {
-					g_signal_connect(object__(), p2.c_str(), G_CALLBACK(event_key__), e);
-					continue;
-				}
-				head = "button";
-				if(p2.compare(0, head.size(), head) == 0 || p2 == "motion-notify-event") {
-					g_signal_connect(object__(), p2.c_str(), G_CALLBACK(event_mouse__), e);
-					continue;
-				}
-				if(p2 == "scroll-event") {
-					g_signal_connect(object__(), p2.c_str(), G_CALLBACK(event_scroll__), e);
-					continue;
-				}
-				if(p2 == "configure-event") {
-					e->b_ = FALSE;
-				}
-				g_signal_connect(object__(), p2.c_str(), G_CALLBACK(event_other__), e);
+		case 'e':
+			switch(event_get_.api__(p, object__())) {
+			case '<':
+				err_.buzu__(p);
+				return true;
 			}
-			break; }
+			break;
 		}
 		return true;
 	case '<':
@@ -270,7 +341,6 @@ bool window___::api__(void* shangji, const std::vector<std::string>& p, std::vec
 }
 
 static void cb_destroy__(GtkWidget* widget, gpointer user_data) {
-	//g_message("Destroying window.");
 	pub::sign___* sign = (pub::sign___*)user_data;
 	if(sign != sign->this_) {
 		pub::ext_->err__("cb_destroy__ sign");
@@ -299,9 +369,7 @@ static gboolean cb_delete_event__(GtkWidget *widget, GdkEvent *event, gpointer g
 	if(w->is_main__())
 		p2.push_back("1");
 	pub::ext_->jieshi__(w, nullptr, nullptr, sig->name_, nullptr, false, &p2, nullptr, &p);
-	if(pub::bool__(p, 0, false))
-		return TRUE;
-	return FALSE;
+	return pub::bool__(p, 0, false);
 }
 
 static gboolean cb_configure_event__(GtkWidget *widget, GdkEventConfigure *event, gpointer user_data) {

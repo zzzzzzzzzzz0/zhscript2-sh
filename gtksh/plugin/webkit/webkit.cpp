@@ -9,6 +9,23 @@
 #include "view.h"
 #include "pub/ext.h"
 #include "pub/tag.h"
+#include <webkit2/webkit2.h>
+
+#ifdef ver_world_1_
+bool webkit___::zs__(guint64 page_id, const std::string& code, std::vector<std::string>& p, std::vector<std::string>& ret) {
+	g_message("id%lu, %s", page_id, code.c_str());
+	for(auto& s : p) g_message("%s", s.c_str());
+	pub::view___ *v = nullptr;
+	v = pub::ext_->get_view__(name_, page_id);
+	if(!v)
+		return false;
+	return pub::ext_->jieshi__(nullptr, v, code.c_str(), nullptr, nullptr, false, &p, nullptr, &ret);
+}
+
+bool webkit___::allow__(const char* url) {
+	return true;
+}
+#endif
 
 static pub::tags___ tags_ = {
 		{"cookie", "c", 1},
@@ -66,7 +83,7 @@ static void cb_uri_scheme_request__ (WebKitURISchemeRequest *request, gpointer u
 			g_free(code);
 			break;
 		default: {
-			GError *error = g_error_new (0, 0, "%s", code);
+			GError *error = g_error_new (1, 0, "%s", code);
 			g_free(code);
 			webkit_uri_scheme_request_finish_error (request, error);
 			g_error_free (error);
@@ -104,9 +121,15 @@ webkit___::webkit___() {
 }
 
 static webkit___ plugin_;
-extern "C" void *plugin__(const std::string &path) {
+extern "C" void *plugin__(const std::string &path, const std::string &l4_so) {
 	std::string dir = path.substr(0, path.rfind('/'));
-	//g_message("%s", dir.c_str());
-	webkit_web_context_set_web_extensions_directory(webkit_web_context_get_default(), dir.c_str());
+	WebKitWebContext *wc = webkit_web_context_get_default();
+	webkit_web_context_set_web_extensions_directory(wc, dir.c_str());
+#ifdef ver_world_1_
+	webkit_web_context_set_web_extensions_initialization_user_data(wc, g_variant_new_uint64((unsigned long)&plugin_));
+#endif
+#ifdef ver_world_2_
+	webkit_web_context_set_web_extensions_initialization_user_data(wc, g_variant_new_string(l4_so.c_str()));
+#endif
 	return &plugin_;
 }

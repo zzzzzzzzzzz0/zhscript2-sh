@@ -42,4 +42,4 @@ bool src___::api__(void* shangji, const std::vector<std::string>& p, std::vector
 }
 
 static src___ plugin_;
-extern "C" void *plugin__(const std::string &path) {return &plugin_;}
+extern "C" void *plugin__(const std::string &path, const std::string &l4_so) {return &plugin_;}

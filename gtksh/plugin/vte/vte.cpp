@@ -38,4 +38,4 @@ pub::view___* vte___::new_view__() {
 }
 
 static vte___ plugin_;
-extern "C" void *plugin__(const std::string &path) {return &plugin_;}
+extern "C" void *plugin__(const std::string &path, const std::string &l4_so) {return &plugin_;}

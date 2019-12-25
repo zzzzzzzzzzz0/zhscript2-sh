@@ -28,9 +28,12 @@ static pub::tags___ tags_callback_ = {
 		{"线宽", "w", 1},
 		{"圆形线帽", "A", 0},
 		{"移", "m", 2},
+		{"旋转", "o", 1},
 		{"直线", "l", 2},
 		{"弧线", "a", 5},
 		{"文字", "t", 1},
+		{"文字大小", "ts", 1},
+		{"文字字体", "tf", 1},
 		{"描画", "s", 0},
 		{"描画二", "s2", 0},
 		{"填充", "f", 0},
@@ -63,23 +66,26 @@ static void callback__(cairo_t *cr, char *buf, int argc, ...) {
 		va_end(argv);
 	}
 	size_t from = 0;
-	auto stof = [&](size_t i) {return std::stof(p[i + from]);};
+	auto stof = [&](size_t i) {return std::stod(p[i + from]);};
+	auto stol = [&](size_t i) {return std::stol(p[i + from]);};
+	auto cstr = [&](size_t i) {return p[i + from].c_str();};
 	for(;;) {
 		std::string tag;
 		size_t argc2;
 		switch(tags_callback_.get__(p, tag, &argc2, from)) {
 		case 'y':
 #ifdef ver_debug_
-			for(size_t i = 0; i <= argc2; i++) {
+			/*for(size_t i = 0; i <= argc2; i++) {
 				size_t i2 = i + from;
 				std::cout << "(" << i2 << ")" << p[i2] << (i < argc2 ? ", " : "\n");
-			}
+			}*/
 #endif
 			try {
 				switch(tag[0]) {
 				case 'c': cairo_set_source_rgba(cr, stof(1), stof(2), stof(3), stof(4)); break;
 				case 'p': cairo_paint(cr); break;
 				case 'm': cairo_move_to(cr, stof(1), stof(2)); break;
+				case 'o': cairo_rotate(cr, stof(1)); break;
 				case 'l': cairo_line_to(cr, stof(1), stof(2)); break;
 				case 'a': cairo_arc(cr, stof(1), stof(2), stof(3), stof(4), stof(5)); break;
 				case 's':
@@ -88,7 +94,13 @@ static void callback__(cairo_t *cr, char *buf, int argc, ...) {
 					case '2': cairo_stroke_preserve(cr); break;
 					}
 					break;
-				case 't': cairo_show_text (cr, p[1 + from].c_str()); break;
+				case 't':
+					switch(tag[1]) {
+					case 's': cairo_set_font_size (cr, stof(1)); break;
+					case 'f': cairo_select_font_face (cr, cstr(1), CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL); break;
+					default: cairo_show_text (cr, cstr(1)); break;
+					}
+					break;
 				case 'S': cairo_scale(cr, stof(1), stof(2)); break;
 				case 'T': cairo_translate(cr, stof(1), stof(2)); break;
 				case 'w': cairo_set_line_width(cr, stof(1)); break;
@@ -105,19 +117,19 @@ static void callback__(cairo_t *cr, char *buf, int argc, ...) {
 				case '3':
 					switch(tag[1]) {
 					case 's':
-						d__(sin(std::stod(p[1])));
+						d__(sin(stof(1)));
 						break;
 					case 'c':
-						d__(cos(std::stod(p[1])));
+						d__(cos(stof(1)));
 						break;
 					}
 					break;
 				case 'R':
-					cairo_set_source_surface(cr, (cairo_surface_t *)std::stol(p[1]), std::stod(p[2]), std::stod(p[3]));
+					cairo_set_source_surface(cr, (cairo_surface_t *)stol(1), stof(2), stof(3));
 					break;
 				case 'G': {
-					gif_surface___ *g = (gif_surface___ *)std::stol(p[1]);
-					gdk_cairo_set_source_pixbuf(cr, g->pixbuf__(), std::stod(p[2]), std::stod(p[3]));
+					gif_surface___ *g = (gif_surface___ *)stol(1);
+					gdk_cairo_set_source_pixbuf(cr, g->pixbuf__(), stof(2), stof(3));
 					break; }
 				}
 			} catch(std::invalid_argument &ia) {

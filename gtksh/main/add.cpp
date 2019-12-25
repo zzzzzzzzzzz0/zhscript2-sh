@@ -15,6 +15,15 @@
 #include "pub/util.h"
 #include "util.h"
 
+void* add___::new_window__(pub::add_opt___* opt, bool is_main) {
+	window___* window = new window___(opt->is_app_paintable_, is_main);
+	if(!opt->window_name_.empty()) {
+		window->name__(opt->window_name_.c_str());
+		window->only_ = true;
+	}
+	return window;
+}
+
 unsigned long add_id_i_ = 0;
 bool add___::begin__(pub::view___ * view, void* w, pub::view___ *from_view, pub::add_opt___* opt) {
 	window___* window = (window___*)w;
@@ -23,15 +32,11 @@ bool add___::begin__(pub::view___ * view, void* w, pub::view___ *from_view, pub:
 		if(from_view) {
 			//debug_.o__("add___::begin__", window->name__(), " ", from_view->name__());
 			if(opt->new_window_) {
-				window = new window___(opt->is_app_paintable_);
-				if(!opt->window_name_.empty()) {
-					window->name__(opt->window_name_.c_str());
-					window->only_ = true;
-				}
+				window = (window___*)new_window__(opt);
 			}
 		}
 	} else
-		window = new window___(opt->is_app_paintable_);
+		window = (window___*)new_window__(opt);
 
 	bool is_new = false;
 	area___ * area = area___::get__(window, opt->pos_, &is_new);
@@ -52,8 +57,10 @@ bool add___::begin__(pub::view___ * view, void* w, pub::view___ *from_view, pub:
 				}
 				break; }
 			default:
-				if(area___::view__(area->widget_)->id_ == opt->id_)
-					return false;
+				for(auto i : area->widget_) {
+					if(area___::view__(i)->id_ == opt->id_)
+						return false;
+				}
 				break;
 			}
 			view->id_ = opt->id_;
@@ -71,10 +78,8 @@ bool add___::begin__(pub::view___ * view, void* w, pub::view___ *from_view, pub:
 	if(from_view) {
 		if(opt->from_) {
 			view->from_ = opt->from_;
-			tofrom__(view);
+			tofrom__(view, true);
 		} else {
-			//view->from_ = from_view; 会因为from先关闭而崩溃
-			//view->from_ = from_view->scrolled__();
 			view->from_ = from_view->id_;
 		}
 	}
@@ -215,17 +220,19 @@ void add___::end_1__(pub::view___ * view, pub::add_opt___* opt) {
 	}
 	switch(area->opt_.typ_) {
 	default:
-		area->widget_ = view->widget__();
+		area->widget_.push_back(view->widget__());
 		pack__(scrolled, area, opt);
 		sigs_view_.conn__(view->widget__(), view);
 		end_2__(view, opt, window);
 		break;
 	case 'n': {
-		GtkWidget *w = GTK_WIDGET(area->widget_);
+		GtkWidget *w = nullptr;
+		if(area->widget_.size())
+			w = GTK_WIDGET(area->widget_[0]);
 		GtkNotebook *nb;
 		if(!w) {
 			w = gtk_notebook_new ();
-			area->widget_ = w;
+			area->widget_.push_back((void*)w);
 			nb = GTK_NOTEBOOK(w);
 			switch(area->opt_.typ2_) {
 			case 'l': gtk_notebook_set_tab_pos (nb, GTK_POS_LEFT); break;
@@ -361,10 +368,13 @@ pub::view___* add___::get_view__(const char *name, void* w) {
 void add___::for_view__(void* w, std::function<bool(pub::view___*)> fn) {
 	area___::for__((window___*)w, [&](area___* area) {
 		switch(area->opt_.typ_) {
-		default:
-			if(!fn(area___::view__(area->widget_)))
-				return true;
-			break;
+		default: {
+			for(auto i : area->widget_) {
+				pub::view___* v = area___::view__(i);
+				if(v && !fn(v))
+					return true;
+			}
+			break; }
 		case 'n': {
 			GtkNotebook *nb = area->nb__();
 			for(int i = 0; i < gtk_notebook_get_n_pages(nb); i++) {
@@ -377,15 +387,17 @@ void add___::for_view__(void* w, std::function<bool(pub::view___*)> fn) {
 	});
 }
 
-bool add___::tofrom__(pub::view___ *view) {
+bool add___::tofrom__(pub::view___ *view, bool b) {
 	area___* area = (area___*)view->area_;
 	switch(area->opt_.typ_) {
 	case 'n': {
 		GtkNotebook *nb = area->nb__();
-		//if(view->from_) {
-		if(view->from_) {
-			//from_view->scrolled__()
-			//int page_num = gtk_notebook_page_num(nb, view->from_);
+		if(!b) {
+			int i1 = gtk_notebook_page_num(nb, view->scrolled__());
+			int i2 = gtk_notebook_get_current_page (nb);
+			b = i1 == i2;
+		}
+		if(view->from_ && b) {
 			for(int i = 0; i < gtk_notebook_get_n_pages(nb); i++) {
 				pub::view___* v = area___::view__(nb, i);
 				if(v->id_ == view->from_) {
@@ -393,8 +405,6 @@ bool add___::tofrom__(pub::view___ *view) {
 					return true;
 				}
 			}
-			/*if(page_num >= 0)
-				gtk_notebook_set_current_page (nb, page_num);*/
 		}
 		break; }
 	}
@@ -403,7 +413,7 @@ bool add___::tofrom__(pub::view___ *view) {
 
 void add___::close__(pub::view___ *view) {
 	code__(view, 0);
-	tofrom__(view);
+	tofrom__(view, false);
 	window___* window = (window___*)view->window_;
 	area___* area = (area___*)view->area_;
 	switch(area->opt_.typ_) {
@@ -473,12 +483,10 @@ pub::view___* add___::activa__(const std::string &name) {
 
 static pub::tags___ tags_ = {
 		{"标签", "L", 0},
-		{"标签提示", "T", 0},
 		{"标签前", "L2", 0},
 		{"页关闭", "x", 0},
 		{"页关闭所有", "X", 0},
 		{"激活", "a", 1},
-		{"页宽高", "s", 0},
 		{"设", "S", 0},
 		{"无标签", "t", 0},
 		{"无边框", "b", 0},
@@ -533,20 +541,6 @@ bool add___::api__(pub::view___ * view, void* shangji, const std::vector<std::st
 			} else
 				ret.push_back(gtk_label_get_text(l));
 			break; }
-		case 'T': {
-			GtkWidget *w = GTK_WIDGET(view->var__("标签"));
-			if(!w) {
-				err_.wufa__(p, SIZE_MAX);
-				return true;
-			}
-			if(p.size() > 1)
-				gtk_widget_set_tooltip_markup(w, p[1].c_str());
-			else {
-				const char* s = gtk_widget_get_tooltip_markup(w);
-				if(s)
-					ret.push_back(s);
-			}
-			break; }
 		case 'X':
 			switch(area->opt_.typ_) {
 			case 'n': {
@@ -563,18 +557,6 @@ bool add___::api__(pub::view___ * view, void* shangji, const std::vector<std::st
 				name = ((window___*)view->window_)->name__() + name;
 			activa__(name);
 			break; }
-		case 's':
-			if(p.size() > 1) {
-				int w = pub::stoi__(p[1]);
-				int h = p.size() > 2 ? pub::stoi__(p[2]) : w;
-				gtk_widget_set_size_request (view->widget__(), w, h);
-			} else {
-				int w, h;
-				gtk_widget_get_size_request (view->widget__(), &w, &h);
-				ret.push_back(std::to_string(w));
-				ret.push_back(std::to_string(h));
-			}
-			break;
 		case 'S':
 			if(!mk__(p, 1, p2))
 				return true;

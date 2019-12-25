@@ -16,7 +16,7 @@
 
 class plugin_item___ {
 public:
-	dl___ dl_;
+	pub2::dl___ dl_;
 	pub::plugin___ *p_ = nullptr;
 };
 

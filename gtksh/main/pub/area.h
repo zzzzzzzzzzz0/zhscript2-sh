@@ -9,13 +9,14 @@
 #define PUB_AREA_H_
 
 #include "addopt.h"
+#include <vector>
 
 namespace pub {
 
 class area___ {
 public:
 	add_opt___ opt_;
-	void *widget_ = nullptr;
+	std::vector<void*> widget_;
 };
 
 } /* namespace pub */

@@ -50,7 +50,6 @@ static bool push_end__(const char* argc, va_list &argv, ext___ *ext, std::vector
 			}
 		}
 	}
-	va_end(argv);
 	return true;
 }
 
@@ -62,6 +61,7 @@ bool ext___::jieshi2__(pub::view___ *v, const char* src2, const char* argc,...) 
 		err__(argc);
 		return false;
 	}
+	va_end(argv);
 	return jieshi__(nullptr, v, nullptr, src2, nullptr, false, &p, nullptr, nullptr);
 }
 bool ext___::jieshi21__(void* w, const char* src2, const char* argc,...) {
@@ -72,6 +72,7 @@ bool ext___::jieshi21__(void* w, const char* src2, const char* argc,...) {
 		err__(argc);
 		return false;
 	}
+	va_end(argv);
 	return jieshi__(w, nullptr, nullptr, src2, nullptr, false, &p, nullptr, nullptr);
 }
 bool ext___::jieshi23__(const char* src, const char* src2, void* shangji, const char* argc,...) {
@@ -82,6 +83,7 @@ bool ext___::jieshi23__(const char* src, const char* src2, void* shangji, const 
 		err__(argc);
 		return false;
 	}
+	va_end(argv);
 	return jieshi__(nullptr, nullptr, src, src2, shangji, false, &p, nullptr, nullptr);
 }
 bool ext___::jieshi22__(void* user_data, const char* argc,...) {
@@ -93,6 +95,7 @@ bool ext___::jieshi22__(void* user_data, const char* argc,...) {
 		err__(argc);
 		return false;
 	}
+	va_end(argv);
 	return jieshi__(nullptr, (view___*)sign->data_,
 			sign->code_.empty() ? nullptr : sign->code_.c_str(),
 			sign->sig_name_.c_str(), nullptr, false, &p, nullptr, nullptr);
