@@ -29,12 +29,11 @@ bool add___::begin__(pub::view___ * view, void* w, pub::view___ *from_view, pub:
 	window___* window = (window___*)w;
 
 	if(window) {
-		if(from_view) {
-			//debug_.o__("add___::begin__", window->name__(), " ", from_view->name__());
+		//if(from_view) {
 			if(opt->new_window_) {
 				window = (window___*)new_window__(opt);
 			}
-		}
+		//}
 	} else
 		window = (window___*)new_window__(opt);
 
@@ -150,7 +149,7 @@ static void cb_drag_data_received__(GtkWidget *widget,
 #ifdef ver_debug_
 	debug_.o__("cb_drag_data_received__ ",pi->name_," ",view->name__());
 #endif
-	if(pi->name_ == "webkit") {
+	if(pi->break_drag__()) {
 		return;
 	}
 	GdkAtom atom=gtk_selection_data_get_data_type(data);
@@ -462,7 +461,7 @@ void add___::close__(pub::view___ *view) {
 	delete view;
 }
 
-pub::view___* add___::activa__(const std::string &name) {
+pub::view___* add___::activa__(const std::string &name, bool to) {
 	window___ *w = nullptr;
 	pub::view___* v = nullptr;
 	std::string tname;
@@ -474,7 +473,7 @@ pub::view___* add___::activa__(const std::string &name) {
 			v = view;
 		});
 	}
-	if(v) {
+	if(v && to) {
 		gtk_window_present(w->hr__());
 		gtk_widget_grab_focus(v->widget__());
 	}
@@ -555,7 +554,7 @@ bool add___::api__(pub::view___ * view, void* shangji, const std::vector<std::st
 			std::string name = p[1];
 			if(name[0] == '#')
 				name = ((window___*)view->window_)->name__() + name;
-			activa__(name);
+			activa__(name, true);
 			break; }
 		case 'S':
 			if(!mk__(p, 1, p2))

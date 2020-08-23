@@ -14,7 +14,8 @@
 
 class view___: public pub::view___ {
 public:
-	view___();
+	view___() : view___(nullptr) {};
+	view___(WebKitWebView* wv);
 	virtual ~view___();
 
 	WebKitWebView *hr__() {return WEBKIT_WEB_VIEW(hr_);}

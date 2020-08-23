@@ -60,3 +60,9 @@ bool gif_surface___::is_end__() {
 	return gdk_pixbuf_animation_iter_on_currently_loading_frame(iter_);
 }
 
+void gif_surface___::redraw__() {
+	if(win_) {
+		//GdkRectangle r{(int)x_, (int)y_, width__(), height__()};
+		gdk_window_invalidate_rect(win_, /*&r*/NULL, FALSE);
+	}
+}

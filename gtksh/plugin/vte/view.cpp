@@ -72,6 +72,7 @@ static pub::tags___ tags_ = {
 		{"pid", "I", 0},
 		{"reset", "R", 0},
 		{"颜色", "B", 1},
+		{"缩放", "S", 1},
 		{"命令", "C", 1},
 };
 
@@ -159,6 +160,9 @@ bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vecto
 			vte_terminal_set_color_foreground(hr__(), &fc);
 			vte_terminal_set_color_background(hr__(), &bc);
 			break; }
+		case 'S':
+			vte_terminal_set_font_scale(hr__(), std::stod(p[1].c_str()));
+			break;
 		case 'C':
 			cmd__(p, 1, hr__(), &pid_, &ret);
 			break;

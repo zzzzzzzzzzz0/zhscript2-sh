@@ -15,6 +15,7 @@ public:
 	webkit___();
 	bool api__(void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret);
 	pub::view___* new_view__();
+	bool break_drag__() {return true;}
 
 #ifdef ver_world_1_
 	bool zs__(guint64 page_id, const std::string& code, std::vector<std::string>& p, std::vector<std::string>& ret);

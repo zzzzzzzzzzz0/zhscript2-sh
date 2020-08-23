@@ -15,6 +15,7 @@ class util___ {
 public:
 	static bool for_name__(const std::string& name, window___ *&w, std::string& tname);
 	static pub::view___* get_view__(const std::string& name1, unsigned long id2);
+	static void chuantou__(GtkWidget *widget);
 };
 
 #endif /* UTIL_H_ */

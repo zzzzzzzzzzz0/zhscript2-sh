@@ -13,6 +13,7 @@
 #include "pub/ext.h"
 #include "pub/util.h"
 #include <gdk/gdkx.h>
+#include "util.h"
 
 #include "liandong.h"
 static liandong___ liandong_;
@@ -106,6 +107,7 @@ static pub::tags___ tags_ = {
 		{"全屏", "F1", 0},
 		{"取消全屏", "F", 0},
 		{"光标形状", "^", 0},
+		{"窗背景色", "b", 1},
 		{"窗句柄", "H", 0},
 		{"xid", "X", 0},
 		{"关闭", "x", 0},
@@ -257,12 +259,19 @@ bool window___::api__(void* shangji, const std::vector<std::string>& p, std::vec
 			}
 			gdk_window_set_cursor(hr2__(), cursor_);
 			break;
+		case 'b': {
+			GdkColor color;
+			gdk_color_parse(p[1].c_str(), &color);
+			gdk_window_set_background(hr2__(), &color);
+			break; }
 		case 'H':
 			ret.push_back(std::to_string((unsigned long)hr_));
 			break;
-		case 'X':
-			ret.push_back(std::to_string(GDK_WINDOW_XID(hr2__())));
-			break;
+		case 'X': {
+			GdkWindow *w = hr2__();
+			if(w)
+				ret.push_back(std::to_string(GDK_WINDOW_XID(w)));
+			break; }
 		case 'x':
 			this->destroy__();
 			break;
@@ -288,29 +297,13 @@ bool window___::api__(void* shangji, const std::vector<std::string>& p, std::vec
 			break; }
 		case '!':
 			switch(tag[1]) {
-			case 't':
-				gtk_window_set_skip_taskbar_hint(hr__(), true);
-				break;
-			case 'o':
-				gtk_window_set_opacity(hr__(), std::stof(p[1]));
-				break;
-			case 'm': {
-				cairo_region_t *r = cairo_region_create();
-				gtk_widget_input_shape_combine_region (widget__(), r);
-				cairo_region_destroy(r);
-				break; }
-			case 's':
-				gtk_window_set_resizable(hr__(), false);
-				break;
-			case 'x':
-				gtk_window_set_deletable(hr__(), false);
-				break;
-			case 'X':
-				gtk_window_set_type_hint(hr__(), GDK_WINDOW_TYPE_HINT_UTILITY);
-				break;
-			case 'T':
-				gtk_window_set_type_hint(hr__(), GDK_WINDOW_TYPE_HINT_DIALOG);
-				break;
+			case 't': gtk_window_set_skip_taskbar_hint(hr__(), true); break;
+			case 'o': gtk_window_set_opacity(hr__(), std::stof(p[1])); break;
+			case 'm': util___::chuantou__(widget__()); break;
+			case 's': gtk_window_set_resizable(hr__(), false); break;
+			case 'x': gtk_window_set_deletable(hr__(), false); break;
+			case 'X': gtk_window_set_type_hint(hr__(), GDK_WINDOW_TYPE_HINT_UTILITY); break;
+			case 'T': gtk_window_set_type_hint(hr__(), GDK_WINDOW_TYPE_HINT_DIALOG); break;
 			}
 			break;
 		case 'd':

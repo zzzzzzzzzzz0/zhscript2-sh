@@ -35,7 +35,7 @@ public:
 
 	static pub::view___ * get_view__(const char *name, void* w);
 	static void close__(pub::view___ *);
-	static pub::view___* activa__(const std::string &name);
+	static pub::view___* activa__(const std::string &name, bool to);
 	static void for_view__(void* w, std::function<bool(pub::view___*)> fn);
 
 	static bool api__(pub::view___ * view, void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret);

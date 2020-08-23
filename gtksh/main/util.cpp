@@ -42,3 +42,9 @@ pub::view___* util___::get_view__(const std::string& name1, unsigned long id2) {
 	}
 	return ret;
 }
+
+void util___::chuantou__(GtkWidget *widget) {
+	cairo_region_t *r = cairo_region_create();
+	gtk_widget_input_shape_combine_region (widget, r);
+	cairo_region_destroy(r);
+}

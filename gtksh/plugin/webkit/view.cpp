@@ -135,6 +135,7 @@ static pub::tags___ tags_ = {
 		{"文本", "lt", 1},
 		{"内容", " ", 1},
 		{"搜", "s", 1},
+		{"缺省字体", "F", 1},
 		{"背景色", "B", 1},
 		{"禁js", "J", 0},
 		{"ua", "@", 0},
@@ -219,16 +220,27 @@ bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vecto
 				ret.push_back("1");
 			}
 			break; }
+		case 'F':
+			webkit_settings_set_default_font_family(set__(), p[1].c_str());
+			/*webkit_settings_set_monospace_font_family(set__(), p[1].c_str());
+			webkit_settings_set_serif_font_family(set__(), p[1].c_str());
+			webkit_settings_set_cursive_font_family(set__(), p[1].c_str());
+			webkit_settings_set_fantasy_font_family(set__(), p[1].c_str());
+			webkit_settings_set_pictograph_font_family(set__(), p[1].c_str());*/
+			break;
 		case 'B': {
-			unsigned int r, g, b, a;
-			if(sscanf(p[1].c_str(), "%02x%02x%02x%02x", &r, &g, &b, &a) != 4) {
-				pub::ext_->buzhichi__(p, 1);
-			}
 			GdkRGBA bc;
-			bc.red = r / 255.0;
-			bc.green = g / 255.0;
-			bc.blue = b / 255.0;
-			bc.alpha = a / 255.0;
+			unsigned int r, g, b, a;
+			if(sscanf(p[1].c_str(), "%02x%02x%02x%02x", &r, &g, &b, &a) == 4) {
+				bc.red = r / 255.0;
+				bc.green = g / 255.0;
+				bc.blue = b / 255.0;
+				bc.alpha = a / 255.0;
+			} else {
+				if(!gdk_rgba_parse (&bc, p[1].c_str())) {
+					pub::ext_->buzhichi__(p, 1);
+				}
+			}
 			webkit_web_view_set_background_color(hr__(), &bc);
 			break; }
 		case 'J':
@@ -386,7 +398,7 @@ static void cb_load_changed__(WebKitWebView  *web_view, WebKitLoadEvent load_eve
 }
 
 static GtkWidget* cb_create__ (WebKitWebView *web_view, WebKitNavigationAction *navigation_action, gpointer user_data) {
-	view___* v = new view___();
+	view___* v = new view___(web_view);
 	pub::add_opt___ opt;
 	std::vector<std::string> p;
 	pub::sign___* sign = (pub::sign___*)user_data;
@@ -494,14 +506,18 @@ static pub::sigs___ sigs_ = {
 		{"close", G_CALLBACK(cb_close__), "脚关闭"},
 };
 
-view___::view___() {
-	hr_ = webkit_web_view_new();
+view___::view___(WebKitWebView* rv) {
+	if(rv)
+		hr_ = webkit_web_view_new_with_related_view(rv);
+	else
+		hr_ = webkit_web_view_new();
 
 	WebKitSettings *wks = set__();
 	webkit_settings_set_allow_file_access_from_file_urls(wks, true);
 	webkit_settings_set_allow_universal_access_from_file_urls(wks, true);
 	webkit_settings_set_enable_developer_extras(wks, true);
 	webkit_settings_set_enable_write_console_messages_to_stdout(wks, true);
+	webkit_settings_set_enable_webgl(wks, true);
 
 	sigs_.conn__(hr_, this);
 }

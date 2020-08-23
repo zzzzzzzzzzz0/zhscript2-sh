@@ -23,6 +23,30 @@ namespace fs = std::experimental::filesystem;
 namespace _p = std::placeholders;
 #include <sys/time.h>
 
+static std::string g_log_;
+static void g_log__(const gchar *log_domain, GLogLevelFlags log_level,const gchar *message,gpointer user_data){
+	char c=0;
+	switch(log_level){
+	case G_LOG_LEVEL_CRITICAL:	c='c';break;
+	case G_LOG_LEVEL_WARNING:	c='w';break;
+	case G_LOG_LEVEL_DEBUG:		c='d';break;
+	case G_LOG_LEVEL_MESSAGE:	c='m';break;
+	case G_LOG_LEVEL_INFO:		c='i';break;
+	case G_LOG_FLAG_RECURSION:	c='r';break;
+	case G_LOG_FLAG_FATAL:		c='f';break;
+	case G_LOG_LEVEL_ERROR:		c='e';break;
+	case G_LOG_LEVEL_MASK:		c='M';break; // [-Wswitch]
+	}
+	if(g_log_.find(c) != std::string::npos)
+		return;
+	std::cerr << "g_log-";
+	if(c)
+		std::cerr << c;
+	else
+		std::cerr << log_level;
+	std::cerr << "-" << (log_domain ? log_domain : "") << ": " << message << std::endl;
+}
+
 static void not_block__() {
 	while (gtk_events_pending ())
 	  gtk_main_iteration ();
@@ -119,6 +143,7 @@ static pub::tags___ tags_ = {
 		{"始id", "i", 1},
 		{"代码", " ", 1},
 		{"错代码", "E", 1},
+		{"g_log", "L", 1},
 }, tags_page_ = {
 		{"标签提示", "T", 0},
 		{"格", "F", 1},
@@ -127,6 +152,7 @@ static pub::tags___ tags_ = {
 		{"敏感", "S", 0},
 		{"提示", "t", 0},
 		{"字体", "f", 1},
+		{"页鼠标穿透", "!m", 0},
 		{"改id", "i", 1},
 };
 
@@ -191,6 +217,11 @@ void main___::api__(window___ *window, pub::view___ *view, void* shangji, const 
 				gtk_widget_modify_font (view->widget__(), font_desc);
 				pango_font_description_free (font_desc);
 				break; }
+			case '!':
+				switch(tag[1]) {
+				case 'm': util___::chuantou__(view->widget__()); break;
+				}
+				break;
 			case 'i':
 				view->id_ = pub::stoul__(p[1]);
 				break;
@@ -250,7 +281,7 @@ void main___::api__(window___ *window, pub::view___ *view, void* shangji, const 
 					name += "#" + opt.name_;
 				}
 				if(!name.empty()) {
-					v = add___::activa__(name);
+					v = add___::activa__(name, opt.to_);
 					if(v) {
 						if(!opt.only_switch_) {
 							if(opt.use_open_)
@@ -304,6 +335,12 @@ void main___::api__(window___ *window, pub::view___ *view, void* shangji, const 
 			return;
 		case 'E':
 			err_.code_ = p[1];
+			return;
+		case 'L':
+			g_log_ = p[1];
+			for(size_t i = 2; i < p.size(); i++) {
+				g_log_set_handler (p[i].c_str(), (GLogLevelFlags)(G_LOG_LEVEL_MASK), g_log__, NULL);
+			}
 			return;
 		}
 		break; }
@@ -410,29 +447,9 @@ bool main___::for_plugin__(const std::string &path) {
 	return true;
 }
 
-static void g_log__(const gchar *log_domain, GLogLevelFlags log_level,const gchar *message,gpointer user_data){
-	char c=0;
-	switch(log_level){
-	case G_LOG_LEVEL_CRITICAL:	c='c';break;
-	case G_LOG_LEVEL_WARNING:	c='w';break;
-	case G_LOG_LEVEL_DEBUG:		c='d';break;
-	case G_LOG_LEVEL_MESSAGE:	c='m';break;
-	case G_LOG_LEVEL_INFO:		c='i';break;
-	case G_LOG_FLAG_RECURSION:	c='r';break;
-	case G_LOG_FLAG_FATAL:		c='f';break;
-	case G_LOG_LEVEL_ERROR:		c='e';break;
-	case G_LOG_LEVEL_MASK:		c='M';break;
-	}
-	std::cerr<<"log--"<<(log_domain?log_domain:"")<<"--";
-	if(c)
-		std::cerr<<c;
-	else
-		std::cerr<<log_level;
-	std::cerr<<"--"<<message<<std::endl;
-}
 int main___::main__(int argc, char* argv[]) {
 	{
-		GLogLevelFlags llf=(GLogLevelFlags)(G_LOG_LEVEL_MASK);
+		GLogLevelFlags llf = (GLogLevelFlags)(G_LOG_LEVEL_MASK);
 		g_log_set_handler (NULL, llf, g_log__, NULL);
 		g_log_set_handler ("Gtk", llf, g_log__, NULL);
 		g_log_set_handler ("Gdk", llf, g_log__, NULL);

@@ -45,11 +45,16 @@ static pub::tags___ tags_callback_ = {
 		{"cos", "3c", 1},
 		{"像面", "R", 3},
 		{"动画面", "G", 3},
+		{"写文件", "W", 1},
 };
 
-static void callback__(cairo_t *cr, char *buf, int argc, ...) {
+static void callback__(view___* view, cairo_t *cr, char *buf, int argc, ...) {
 	if(!argc) return;
-	auto x__ = [&] {buf[0] = 'x'; buf[1] = 0;};
+	auto x__ = [&] {
+		buf[0] = 'x';
+		buf[1] = 0;
+		view->draw_code_ok_ = false;
+	};
 	auto d__ = [&](double d) {
 		const std::string s = std::to_string(d);
 		s.copy(buf, s.length());
@@ -98,6 +103,11 @@ static void callback__(cairo_t *cr, char *buf, int argc, ...) {
 					switch(tag[1]) {
 					case 's': cairo_set_font_size (cr, stof(1)); break;
 					case 'f': cairo_select_font_face (cr, cstr(1), CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL); break;
+					/*
+					cairo_text_extents_t te;
+					cairo_text_extents (cr, s, &te);
+					cairo_move_to (cr, i + 0.5 - te.x_bearing - te.width / 2, 0.5 - te.y_bearing - te.height / 2);
+					*/
 					default: cairo_show_text (cr, cstr(1)); break;
 					}
 					break;
@@ -129,8 +139,14 @@ static void callback__(cairo_t *cr, char *buf, int argc, ...) {
 					break;
 				case 'G': {
 					gif_surface___ *g = (gif_surface___ *)stol(1);
-					gdk_cairo_set_source_pixbuf(cr, g->pixbuf__(), stof(2), stof(3));
+					g->win_ = gtk_widget_get_window(view->widget__());
+					g->x_ = stof(2);
+					g->y_ = stof(3);
+					gdk_cairo_set_source_pixbuf(cr, g->pixbuf__(), g->x_, g->y_);
 					break; }
+				case 'W':
+					cairo_surface_write_to_png (cairo_get_target (cr), cstr(1));
+					break;
 				}
 			} catch(std::invalid_argument &ia) {
 				pub::ext_->throw2__("数字格式错误 ", ia);
@@ -173,9 +189,23 @@ bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vecto
 				const std::string& opt = p[2];
 				if(opt == "有更") {
 					if(g->next__()) {
-						gdk_window_invalidate_rect(gtk_widget_get_window(widget__()), NULL, FALSE);
+						g->redraw__();
 					}
 					break;
+				}
+				if(opt == "自动") {g->auto_ = true; break;}
+				if(opt == "暂停") {g->auto_ = false; break;}
+				if(opt == "下时") {
+					if(p.size() > 3) {
+						g->next_code_ = p[3];
+						break;
+					}
+				}
+				if(opt == "末时") {
+					if(p.size() > 3) {
+						g->end_code_ = p[3];
+						break;
+					}
 				}
 			}
 			pub::ext_->buzhichi__(p, SIZE_MAX);
@@ -225,13 +255,16 @@ static gboolean cb_draw__(GtkWidget * widget, GdkEventExpose * event, gpointer d
 	if(view->draw_code_ok_) {
 		cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
 		std::string code;
-		code += "函数“口”以“&”、“" + std::to_string((unsigned long)callback__) + "”、"
-				"“-${l" + std::to_string((long)cr) + "}-B-Z”。基于先";
+		code += "函数“口”以“&”、“" + std::to_string((unsigned long)callback__) + "”、“-${l" +
+				std::to_string((long)view) + "}-${l" +
+				std::to_string((long)cr) + "}-B-Z”。基于先";
 #ifdef ver_debug_
 		//code += "显示‘参数’换行。";
 #endif
 		code += "如果调用‘口’、‘参数栈’等于“x”那么退出“1”。了先" + view->draw_code_ + "了";
-		view->draw_code_ok_ = pub::ext_->jieshi23__(code.c_str());
+		bool ok = pub::ext_->jieshi23__(code.c_str());
+		if(!ok)
+			view->draw_code_ok_ = false;
 		cairo_destroy(cr);
 	}
 	return FALSE;
