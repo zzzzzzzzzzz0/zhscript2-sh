@@ -1,0 +1,23 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) edit", "type": "cppdbg", "request": "launch",
+            "program": "/opt2/debug/zhscript2/gtksh", "args": [
+                "/opt2/debug/zhscript2/edit/ui.zs"
+            ], "stopAtEntry": false, "cwd": "${workspaceFolder}", "environment": [], "externalConsole": false, "MIMode": "gdb",
+            "setupCommands": [{"text": "-enable-pretty-printing", "ignoreFailures": true}, {"text": "-gdb-set disassembly-flavor intel", "ignoreFailures": true}]
+        }
+        ,
+        {
+            "name": "(gdb) opt2 startbox2", "type": "cppdbg", "request": "launch",
+            "program": "/opt2/debug/zhscript2/l", "args": [
+                "/opt2/opt/startbox2/begin.zs", "ne", "-1", "-s", "3s"
+            ], "stopAtEntry": false, "cwd": "${workspaceFolder}", "environment": [], "externalConsole": false, "MIMode": "gdb",
+            "setupCommands": [{"text": "-enable-pretty-printing", "ignoreFailures": true}, {"text": "-gdb-set disassembly-flavor intel", "ignoreFailures": true}]
+        }
+    ]
+}
