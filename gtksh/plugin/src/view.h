@@ -21,12 +21,16 @@ public:
 	GtkTextBuffer* buf2__() {return GTK_TEXT_BUFFER (buf_);}
 
 	bool api__(void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret);
-	void new_open__(const std::vector<std::string>& p);
+	void new_open__(const std::vector<std::string>& p, bool is_new);
+	void text_begin__(bool no_undo);
+	void text_end__(bool no_undo);
+	bool text_opti__(const std::vector<std::string>& p, bool& no_undo);
 private:
 	GtkWidget *sw_;
 	GtkSourceBuffer *buf_;
 	char* text__(bool is_sel = false);
 	void scroll2__(GtkTextIter* ti, bool place = true);
+	void openfile__(const std::vector<std::string>& p, size_t from, bool no_undo, std::vector<std::string>* ret);
 };
 
 #endif /* VIEW_H_ */

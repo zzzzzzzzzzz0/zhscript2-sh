@@ -20,7 +20,6 @@ public:
 	WnckPager *hr__() {return WNCK_PAGER (hr_);}
 
 	bool api__(void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret);
-	void new_open__(const std::vector<std::string>& p);
 };
 
 #endif /* VIEW_H_ */

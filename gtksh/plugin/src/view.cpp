@@ -21,15 +21,14 @@ pub::debug___ debug_;
 
 static src___ *plugin_ = nullptr;
 
-static void openfile__(const std::vector<std::string>& p, size_t from, GtkSourceBuffer *buf, GtkTextBuffer* buf2, std::vector<std::string>* ret) {
+void view___::openfile__(const std::vector<std::string>& p, size_t from, bool no_undo, std::vector<std::string>* ret) {
 	gchar *contents;
 	gsize length;
 	GError *error=NULL;
 	if(g_file_get_contents(p[from].c_str(),&contents,&length,&error)){
-		gtk_source_buffer_begin_not_undoable_action(buf);
-		gtk_text_buffer_set_text(buf2, contents, length);
-		gtk_source_buffer_end_not_undoable_action(buf);
-		gtk_text_buffer_set_modified(buf2, false);
+		text_begin__(no_undo);
+		gtk_text_buffer_set_text(buf2__(), contents, length);
+		text_end__(no_undo);
 
 		g_free(contents);
 	}else{
@@ -40,14 +39,35 @@ static void openfile__(const std::vector<std::string>& p, size_t from, GtkSource
 		}
 	}
 }
+void view___::text_begin__(bool no_undo) {
+	if(no_undo)
+		gtk_source_buffer_begin_not_undoable_action(buf_);
+}
+void view___::text_end__(bool no_undo) {
+	if(no_undo) {
+		GtkTextIter ti;
+		gtk_text_buffer_get_iter_at_offset(buf2__(), &ti, 0);
+		gtk_text_buffer_place_cursor(buf2__(), &ti);
+
+		gtk_source_buffer_end_not_undoable_action(buf_);
+	}
+	gtk_text_buffer_set_modified(buf2__(), false);
+}
+bool view___::text_opti__(const std::vector<std::string>& p, bool& no_undo) {
+	for(size_t i = 2; i < p.size(); i++) {
+		const std::string& p3=p[i];
+		if(p3 == "可撤销") {
+			no_undo = false;
+			continue;
+		}
+		pub::ext_->buzhichi__(p, i);
+		return false;
+	}
+	return true;
+}
 
 static void cb_modified_changed__ (GtkTextBuffer *textbuffer, gpointer user_data) {
 	pub::ext_->jieshi22__(user_data, "s", gtk_text_buffer_get_modified(textbuffer) ? "1" : "");
-	/*pub::sign___* sign = (pub::sign___*)user_data;
-	std::vector<std::string> p;
-	if(gtk_text_buffer_get_modified(textbuffer))
-		p.push_back("1");
-	pub::ext_->jieshi__(nullptr, (view___*)sign->data_, sign->code_.c_str(), nullptr, nullptr, false, &p, nullptr, nullptr);*/
 }
 
 static void drag_data_received__(GtkWidget *widget,
@@ -108,11 +128,13 @@ static pub::tags___ tags_ = {
 		{"粘贴", "v", 0},
 		{"撤销", "u", 0},
 		{"重做", "r", 0},
+		{"缩进用空格", "I", 0},
 		{"语法高亮", "h", 1},
 		{"内容", " ", 0},
 		{"打开文件", "o", 1},
 		{"保存文件", "s", 1},
 		{"刷新", "R", 0},
+		{"不可编辑", "E", 0},
 		{"侦听", "z", 0},
 };
 
@@ -252,6 +274,9 @@ bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vecto
 			}
 			gtk_source_buffer_redo(buf_);
 			break;
+		case 'I':
+			gtk_source_view_set_insert_spaces_instead_of_tabs(hr__(), true);
+			break;
 		case'h':
 			if(p.size()>1){
 				const std::string &id = p[1];
@@ -273,17 +298,9 @@ bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vecto
 			if(p.size() > 1) {
 				const std::string&s=p[1];
 				bool no_undo = true;
-				for(size_t i = 2; i < p.size(); i++) {
-					const std::string& p3=p[i];
-					if(p3 == "可撤销") {
-						no_undo = false;
-						continue;
-					}
-					pub::ext_->buzhichi__(p, i);
+				if(!text_opti__(p, no_undo))
 					return true;
-				}
-				if(no_undo)
-					gtk_source_buffer_begin_not_undoable_action(buf_);
+				text_begin__(no_undo);
 				switch(tag[1]) {
 				case 's':
 					break;
@@ -291,19 +308,19 @@ bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vecto
 					gtk_text_buffer_set_text(buf2__(), s.c_str(), s.size());
 					break;
 				}
-				if(no_undo) {
-					gtk_source_buffer_end_not_undoable_action(buf_);
-					gtk_text_buffer_set_modified(buf2__(), false);
-				}
+				text_end__(no_undo);
 			} else {
 				char* text = text__(tag[1] == 's');
 				ret.push_back(text);
 				g_free (text);
 			}
 			break;
-		case 'o':
-			openfile__(p, 1, buf_, buf2__(), &ret);
-			break;
+		case 'o': {
+			bool no_undo = true;
+			if(!text_opti__(p, no_undo))
+				return true;
+			openfile__(p, 1, no_undo, &ret);
+			break; }
 		case 's': {
 			GError *error = NULL;
 			const std::string& filename = p[1];
@@ -328,6 +345,9 @@ bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vecto
 			}
 			reinit__();
 			break;
+		case 'E':
+			gtk_text_view_set_editable(hr2__(), false);
+			break;
 		case 'z':
 			for(size_t i = 1; i < p.size(); i += 2) {
 				const std::string& p1 = p[i];
@@ -351,9 +371,9 @@ bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vecto
 	return pub::view___::api__(shangji, p, p2, ret);
 }
 
-void view___::new_open__(const std::vector<std::string>& p) {
+void view___::new_open__(const std::vector<std::string>& p, bool is_new) {
 	if(p.size() > 0 && !p[0].empty()) {
-		openfile__(p, 0, buf_, buf2__(), nullptr);
+		openfile__(p, 0, is_new, nullptr);
 	}
 }
 

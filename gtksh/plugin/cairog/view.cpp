@@ -17,6 +17,7 @@
 #include <iostream>
 #endif
 #include <cmath>
+#include <stdexcept>
 
 static cairog___ *plugin_ = nullptr;
 
@@ -245,7 +246,7 @@ bool view___::draw_code__(const std::vector<std::string>& p, size_t i) {
 	return false;
 }
 
-void view___::new_open__(const std::vector<std::string>& p) {
+void view___::new_open__(const std::vector<std::string>& p, bool is_new) {
 	//draw_code__(p, 0);
 }
 

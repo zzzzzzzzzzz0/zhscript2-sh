@@ -23,7 +23,7 @@ public:
 	int x_ = -1, y_ = -1;
 	std::string state_;
 
-	window___(bool is_app_paintable = false, bool is_main = false);
+	window___(bool is_app_paintable = false, bool is_popup = false, bool is_main = false);
 	virtual ~window___();
 
 	GtkWindow *hr__() {return GTK_WINDOW(hr_);}

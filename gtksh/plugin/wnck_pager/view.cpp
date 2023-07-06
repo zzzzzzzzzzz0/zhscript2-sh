@@ -53,9 +53,6 @@ bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vecto
 	return pub::view___::api__(shangji, p, p2, ret);
 }
 
-void view___::new_open__(const std::vector<std::string>& p) {
-}
-
 static pub::sigs___ sigs_ = {
 };
 

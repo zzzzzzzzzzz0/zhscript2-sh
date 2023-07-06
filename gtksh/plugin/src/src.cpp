@@ -21,7 +21,7 @@ bool src___::api__(void* shangji, const std::vector<std::string>& p, std::vector
 		case 'H': {
 			GtkSourceLanguageManager *slm = gtk_source_language_manager_get_default ();
 			const gchar * const *ids = gtk_source_language_manager_get_language_ids (slm);
-			for (int i = 0; ids[i] != NULL; i++) {
+			if(ids) for (int i = 0; ids[i] != NULL; i++) {
 				const gchar * id = ids[i];
 				GtkSourceLanguage *sl = gtk_source_language_manager_get_language (slm, id);
 				if(!pub::ext_->jieshi23__(p[1].c_str(), nullptr, shangji, "lsss",

@@ -52,7 +52,7 @@ bool realpath2__(std::string &path) {
 	return false;
 }
 
-bool l4___::path__(const char* path, std::string &path3, std::string &path1, std::string &path11) {
+bool l4___::path__(const char* path, std::string &path3, std::string &path1, std::string &path11, std::string &path12) {
 	std::string path2 = path;
 	if(path2.rfind('/') == std::string::npos) {
 		if(realpath2__(path2)) {
@@ -63,7 +63,10 @@ bool l4___::path__(const char* path, std::string &path3, std::string &path1, std
 		}
 	}
 	if(is_symlink__(path2.c_str())) {
-		for(;realpath__(path2););
+		for(;realpath__(path2);) {
+			if(path12.empty())
+				path12 = path2;
+		}
 	}
 	path1 = path2;
 	for(size_t i2 = 0;; i2++) {
@@ -94,9 +97,9 @@ bool l4___::path__(const char* path, std::string &path3, std::string &path1, std
 	return true;
 }
 
-bool l4___::init2__(const char* line1, int argc, char* argv[], std::string &path1) {
+bool l4___::init2__(const char* line1, int argc, char* argv[], std::string &path1, std::string &path12) {
 	std::string path2 = path1;
-	if(!path__(argv[0], path_, path1, path2)) {
+	if(!path__(argv[0], path_, path1, path2, path12)) {
 		err_.o__("找不到", path_);
 		return false;
 	}

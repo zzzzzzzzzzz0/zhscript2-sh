@@ -23,6 +23,9 @@ namespace fs = std::experimental::filesystem;
 namespace _p = std::placeholders;
 #include <sys/time.h>
 
+#include "pub/eventget.h"
+static pub::event_get___ key_event_get_;
+
 static std::string g_log_;
 static void g_log__(const gchar *log_domain, GLogLevelFlags log_level,const gchar *message,gpointer user_data){
 	char c=0;
@@ -88,6 +91,10 @@ bool wait__(const char* s) {
 }
 
 static void push__(pub::view___ * view, const char* fmt, std::vector<std::string>& p) {
+	if(!view) {
+		p.push_back("");
+		return;
+	}
 	window___* window = (window___*)view->window_;
 	for(int i = 0;; i++) {
 		char c = fmt[i];
@@ -146,11 +153,13 @@ static pub::tags___ tags_ = {
 		{"g_log", "L", 1},
 }, tags_page_ = {
 		{"标签提示", "T", 0},
+		{"提示", "t", 0},
+		{"焦点", "o", 0},
 		{"格", "F", 1},
 		{"页宽高", "s", 0},
 		{"客区宽高", "s", 0},
 		{"敏感", "S", 0},
-		{"提示", "t", 0},
+		{"快捷键", "e", 1},
 		{"字体", "f", 1},
 		{"页鼠标穿透", "!m", 0},
 		{"改id", "i", 1},
@@ -158,6 +167,8 @@ static pub::tags___ tags_ = {
 
 void main___::api__(window___ *window, pub::view___ *view, void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret) {
 	if(view) {
+		if(view->api__(shangji, p, p2, ret))
+			return;
 		std::string tag;
 		switch(tags_page_.get__(p, tag)) {
 		case 'y': {
@@ -176,6 +187,18 @@ void main___::api__(window___ *window, pub::view___ *view, void* shangji, const 
 						ret.push_back(s);
 				}
 				break; }
+			case 't':
+				if(p.size() > 1)
+					gtk_widget_set_tooltip_markup(view->widget__(), p[1].c_str());
+				else {
+					const char* s = gtk_widget_get_tooltip_markup(view->widget__());
+					if(s)
+						ret.push_back(s);
+				}
+				break;
+			case 'o':
+				gtk_widget_grab_focus(view->widget__());
+				break;
 			case 'F':
 				push__(view, p[1].c_str(), ret);
 				break;
@@ -203,15 +226,12 @@ void main___::api__(window___ *window, pub::view___ *view, void* shangji, const 
 					ret.push_back(std::to_string(gtk_widget_get_sensitive(view->widget__())));
 				}
 				break;
-			case 't':
-				if(p.size() > 1)
-					gtk_widget_set_tooltip_markup(view->widget__(), p[1].c_str());
-				else {
-					const char* s = gtk_widget_get_tooltip_markup(view->widget__());
-					if(s)
-						ret.push_back(s);
-				}
-				break;
+			case 'e': {
+				std::vector<std::string> p2;
+				p2.push_back("key-press-event");
+				p2.push_back(p[1]);
+				key_event_get_.api__(p2, view->object__(), 0, FALSE);
+				break; }
 			case 'f': {
 				PangoFontDescription *font_desc = pango_font_description_from_string (p[1].c_str());
 				gtk_widget_modify_font (view->widget__(), font_desc);
@@ -231,8 +251,6 @@ void main___::api__(window___ *window, pub::view___ *view, void* shangji, const 
 			err_.buzu__(p, SIZE_MAX);
 			return;
 		}
-		if(view->api__(shangji, p, p2, ret))
-			return;
 		if(add___::api__(view, shangji, p, p2, ret))
 			return;
 	}
@@ -281,12 +299,22 @@ void main___::api__(window___ *window, pub::view___ *view, void* shangji, const 
 					name += "#" + opt.name_;
 				}
 				if(!name.empty()) {
-					v = add___::activa__(name, opt.to_);
+					GtkNotebook *nb2 = nullptr;
+					int i2;
+					v = add___::activa__(name, opt.to_, opt.to2_, &nb2, &i2);
 					if(v) {
-						if(!opt.only_switch_) {
+						if(!(opt.only_switch_ || opt.no_switch_)) {
 							if(opt.use_open_)
-								v->new_open__(p32);
-							add___::end_3__(v, &p32, true);
+								v->new_open__(p32, false);
+							v->add_end__(p32);
+						}
+						if(!(opt.no_switch_)) {
+							if(nb2)
+								add___::curr__(nb2, i2);
+						}
+						if(!(opt.only_switch_ || opt.no_switch_)) {
+							add___::code__(v);
+							v->add_end__(true);
 						}
 						return;
 					}
@@ -312,8 +340,10 @@ void main___::api__(window___ *window, pub::view___ *view, void* shangji, const 
 			}
 			if(v) {
 				if(opt.use_open_)
-					v->new_open__(p32);
+					v->new_open__(p32, true);
 				jieshi_b__(nullptr, v, p3, opt);
+				if(opt.no_switch_)
+					v->init2_need__();
 				add___::end__(v, nullptr, &opt, &p32, pi->p_);
 			} else {
 				jieshi_b__(w, nullptr, p3, opt);
@@ -457,8 +487,8 @@ int main___::main__(int argc, char* argv[]) {
 		g_log_set_handler ("GLib-GObject", llf, g_log__, NULL);
 	}
 	gtk_init(&argc, &argv);
-	std::string path = argv[0];
-	if(!l4_.init2__("", argc, argv, path))
+	std::string path = argv[0], path12;
+	if(!l4_.init2__("", argc, argv, path, path12))
 		return -1;
 	qu_ = l4_.new_main_qu__();
 	err2_.jieshi__ = std::bind(&main___::jieshi__, this, _p::_1, nullptr, qu_, false, nullptr, nullptr);
@@ -484,8 +514,9 @@ int main___::main__(int argc, char* argv[]) {
 	pub::ext_->get_view__ = util___::get_view__;
 	pub::ext_->push__ = push__;
 	pub::ext_->wait__ = wait__;
+	pub::ext_->exists_ = exists__;
 
-	if(!for_plugin__(path + "-plugin"))
+	if(!for_plugin__((!path12.empty() ? path12 : path) + "-plugin"))
 		return -1;
 
 	if(!l4_.has_src__()) {

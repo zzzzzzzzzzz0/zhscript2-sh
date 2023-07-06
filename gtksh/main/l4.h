@@ -12,12 +12,12 @@
 
 class l4___ : public pub2::l4___ {
 private:
-	bool path__(const char* path, std::string &path3, std::string &path1, std::string &path11);
+	bool path__(const char* path, std::string &path3, std::string &path1, std::string &path11, std::string &path12);
 public:
 	std::string path_;
 	l4___();
 	virtual ~l4___();
-	bool init2__(const char* line, int argc, char* argv[], std::string &path1);
+	bool init2__(const char* line, int argc, char* argv[], std::string &path1, std::string &path12);
 };
 
 extern bool exists__(const char *filename);

@@ -16,7 +16,7 @@
 #include "util.h"
 
 void* add___::new_window__(pub::add_opt___* opt, bool is_main) {
-	window___* window = new window___(opt->is_app_paintable_, is_main);
+	window___* window = new window___(opt->is_app_paintable_, opt->is_popup_, is_main);
 	if(!opt->window_name_.empty()) {
 		window->name__(opt->window_name_.c_str());
 		window->only_ = true;
@@ -47,7 +47,7 @@ bool add___::begin__(pub::view___ * view, void* w, pub::view___ *from_view, pub:
 			switch(area->opt_.typ_) {
 			case 'n': {
 				GtkNotebook *nb = area->nb__();
-				for(int i = 0; i < gtk_notebook_get_n_pages(nb); i++) {
+				if(nb) for(int i = 0; i < gtk_notebook_get_n_pages(nb); i++) {
 					pub::view___* v = area___::view__(nb, i);
 					if(v->id_ == opt->id_) {
 						gtk_notebook_set_current_page (nb, i);
@@ -73,10 +73,12 @@ bool add___::begin__(pub::view___ * view, void* w, pub::view___ *from_view, pub:
 		view->area_ = area;
 		view->var__("", view);
 		view->window_ = window;
+
+		view->from_ = opt->from_;
+		//printf("%lu %lu %s \n",view->from_,view->id_,view->name__());
 	}
 	if(from_view) {
 		if(opt->from_) {
-			view->from_ = opt->from_;
 			tofrom__(view, true);
 		} else {
 			view->from_ = from_view->id_;
@@ -100,20 +102,26 @@ static void cb_clicked__(GtkButton *button, gpointer user_data) {
 	pub::ext_->jieshi2__(view, sig->name_);
 	switch(sig->flag_) {
 	case 'x': {
-		sig->disconn__(button);
 		add___::close__(view);
+		sig->disconn__(button);
 		break; }
 	}
 }
 
 static pub::view___ *switch_page_ = nullptr;
-static void switch_page__(GtkNotebook *notebook, gpointer *page,gint page_num){
+static void switch_page__(GtkNotebook *notebook, GtkWidget *page,gint page_num){
 	pub::view___ * view = area___::view__(notebook, page_num);
-	if(switch_page_ != view)
-		switch_page_ = view;
-	else return;
+	if(switch_page_ == view) return;
+	/*pub::view___ * view2 = nullptr;
+	for(int i = 0; i < gtk_notebook_get_n_pages(notebook); i++) {
+		if(switch_page_ == area___::view__(notebook, i)) {
+			view2 = switch_page_;
+			break;
+		}
+	}*/
+	switch_page_ = view;
 	view->init2__(2);
-	pub::ext_->jieshi2__(view, "页切换", "#", view);
+	pub::ext_->jieshi2__(view, "页切换", "#" /*"#"*/, view/*, view2*/);
 }
 
 static bool jieshi_drag_data__(char* uri, pub::view___* view, pub::plugin___* pi, pub::sig___* sig,
@@ -283,18 +291,23 @@ void add___::end_1__(pub::view___ * view, pub::add_opt___* opt) {
 			sigs_view_.conn__(view->widget__(), view);
 		}
 		view->var__("-可关闭", (void*)can_close);
-		g_object_set_data(G_OBJECT(scrolled), "", view);
+		pub::base___::var__(scrolled, "", view);
 		for(;;) {
 			if(opt->append_ || area->opt_.append_) {
 			} else {
-				int page_num = gtk_notebook_get_current_page (nb);
-				if(page_num >= 0) {
-					view->from2_ = area___::view__(nb, page_num);
-					if(opt->insert0_ || area->opt_.insert0_) {
-					} else
-						page_num++;
-					gtk_notebook_insert_page (nb, scrolled, label, page_num);
+				if(opt->left_ || area->opt_.left_) {
+					gtk_notebook_insert_page (nb, scrolled, label, 0);
 					break;
+				} else {
+					int page_num = gtk_notebook_get_current_page (nb);
+					if(page_num >= 0) {
+						view->from2_ = area___::view__(nb, page_num);
+						if(opt->insert0_ || area->opt_.insert0_) {
+						} else
+							page_num++;
+						gtk_notebook_insert_page (nb, scrolled, label, page_num);
+						break;
+					}
 				}
 			}
 			gtk_notebook_append_page (nb, scrolled, label);
@@ -315,12 +328,6 @@ void add___::end_1__(pub::view___ * view, pub::add_opt___* opt) {
 	}
 }
 
-void add___::end_3__(pub::view___ * view, std::vector<std::string>* p, bool is_switch) {
-	view->add_end__(*p);
-	code__(view);
-	view->add_end__(is_switch);
-}
-
 void add___::end__(pub::view___ * view, void* w, pub::add_opt___* opt, std::vector<std::string>* p, pub::plugin___ *p2) {
 	window___* window = (window___*)w;
 	if(!window)
@@ -329,7 +336,9 @@ void add___::end__(pub::view___ * view, void* w, pub::add_opt___* opt, std::vect
 		add___* add = (add___*)window->add__();
 		view->var__("插件", p2);
 		add->end_1__(view, opt);
-		end_3__(view, p, false);
+		view->add_end__(*p);
+		code__(view);
+		view->add_end__(false);
 	} else
 		end_2__(nullptr, nullptr, window);
 }
@@ -376,7 +385,7 @@ void add___::for_view__(void* w, std::function<bool(pub::view___*)> fn) {
 			break; }
 		case 'n': {
 			GtkNotebook *nb = area->nb__();
-			for(int i = 0; i < gtk_notebook_get_n_pages(nb); i++) {
+			if(nb) for(int i = 0; i < gtk_notebook_get_n_pages(nb); i++) {
 				if(!fn(area___::view__(nb, i)))
 					return true;
 			}
@@ -391,6 +400,7 @@ bool add___::tofrom__(pub::view___ *view, bool b) {
 	switch(area->opt_.typ_) {
 	case 'n': {
 		GtkNotebook *nb = area->nb__();
+		if(nb) {
 		if(!b) {
 			int i1 = gtk_notebook_page_num(nb, view->scrolled__());
 			int i2 = gtk_notebook_get_current_page (nb);
@@ -405,24 +415,31 @@ bool add___::tofrom__(pub::view___ *view, bool b) {
 				}
 			}
 		}
+		}
 		break; }
 	}
 	return false;
 }
 
 void add___::close__(pub::view___ *view) {
+	window___* window = (window___*)view->window_;
+	if(!window) {
+		return;
+	}
 	code__(view, 0);
 	tofrom__(view, false);
-	window___* window = (window___*)view->window_;
+	view->window_ = nullptr;
 	area___* area = (area___*)view->area_;
 	switch(area->opt_.typ_) {
 	case 'n': {
 		GtkNotebook *nb = area->nb__();
+		if(nb) {
 		gtk_notebook_remove_page(nb, gtk_notebook_page_num(nb, view->scrolled__()));
 		for(int i = 0; i < gtk_notebook_get_n_pages(nb); i++) {
 			pub::view___* v = area___::view__(nb, i);
 			if(v->from2_ == view)
 				v->from2_ = nullptr;
+		}
 		}
 		break; }
 	}
@@ -436,7 +453,7 @@ void add___::close__(pub::view___ *view) {
 			switch(area2->opt_.typ_) {
 			case 'n': {
 				GtkNotebook *nb = area2->nb__();
-				for(int i = 0; i < gtk_notebook_get_n_pages(nb); i++) {
+				if(nb) for(int i = 0; i < gtk_notebook_get_n_pages(nb); i++) {
 					pub::view___* v = area___::view__(nb, i);
 					if(v->var__("-可关闭")) {
 						can_window_destroy = false;
@@ -461,7 +478,7 @@ void add___::close__(pub::view___ *view) {
 	delete view;
 }
 
-pub::view___* add___::activa__(const std::string &name, bool to) {
+pub::view___* add___::activa__(const std::string &name, bool to, bool to2, GtkNotebook **nb2, int* i2) {
 	window___ *w = nullptr;
 	pub::view___* v = nullptr;
 	std::string tname;
@@ -469,23 +486,56 @@ pub::view___* add___::activa__(const std::string &name, bool to) {
 		area___::view__(tname.c_str(), w, [&](pub::view___* view) {
 			v = view;
 		}, [&](pub::view___* view, int i, GtkNotebook *nb) {
-			gtk_notebook_set_current_page (nb, i);
+			if(to2) {
+				if(nb2) {
+					*nb2 = nb;
+					*i2 = i;
+				} else {
+					curr__ (nb, i);
+				}
+			}
 			v = view;
 		});
 	}
-	if(v && to) {
+	if(v && to && to2) {
 		gtk_window_present(w->hr__());
 		gtk_widget_grab_focus(v->widget__());
 	}
 	return v;
 }
+void add___::curr__(GtkNotebook *nb, int i) {
+	gtk_notebook_set_current_page (nb, i);
+}
+
+static void get_tree__(pub::view___ * view, GtkNotebook *nb, std::vector<pub::view___ *>& paichu, std::vector<pub::view___ *>& ls) {
+	paichu.push_back(view);
+	for(int i = 0; i < gtk_notebook_get_n_pages(nb); i++) {
+		pub::view___* v = area___::view__(nb, i);
+		bool paichu2 = false;
+		for(auto v2 : paichu) {
+			if(v2 == v) {
+				paichu2 = true;
+				break;
+			}
+		}
+		if(paichu2) {
+			continue;
+		}
+		if(v->from_ == view->id_) {
+			ls.push_back(v);
+			get_tree__(v, nb, paichu, ls);
+		}
+	}
+}
 
 static pub::tags___ tags_ = {
 		{"标签", "L", 0},
 		{"标签前", "L2", 0},
-		{"页关闭", "x", 0},
-		{"页关闭所有", "X", 0},
 		{"激活", "a", 1},
+		{"页移动", "m", 1},
+		{"页关闭", "x", 0},
+		{"页关闭所有", "xa", 0},
+		{"页关闭相关", "xt", 0},
 		{"设", "S", 0},
 		{"无标签", "t", 0},
 		{"无边框", "b", 0},
@@ -527,35 +577,62 @@ bool add___::api__(pub::view___ * view, void* shangji, const std::vector<std::st
 					gtk_widget_show(w);*/
 
 				if(!tag[1]) {
-					GtkWidget *w2 = view->/*widget*/scrolled__();
-					GtkWidget *w = gtk_notebook_get_menu_label (area->nb__(), w2);
-					if(!w) {
-						w = gtk_label_new ("");
-						gtk_widget_set_halign (w, GTK_ALIGN_START);
-						gtk_notebook_set_menu_label (area->nb__(), w2, w);
+					GtkNotebook *nb = area->nb__();
+					if(nb) {
+						GtkWidget *w2 = view->/*widget*/scrolled__();
+						GtkWidget *w = gtk_notebook_get_menu_label (nb, w2);
+						if(!w) {
+							w = gtk_label_new ("");
+							gtk_widget_set_halign (w, GTK_ALIGN_START);
+							gtk_notebook_set_menu_label (nb, w2, w);
+						}
+						l = GTK_LABEL(w);
+						gtk_label_set_markup(l, s.c_str());
 					}
-					l = GTK_LABEL(w);
-					gtk_label_set_markup(l, s.c_str());
 				}
 			} else
 				ret.push_back(gtk_label_get_text(l));
 			break; }
-		case 'X':
-			switch(area->opt_.typ_) {
-			case 'n': {
-				GtkNotebook *nb = area->nb__();
-				for(; gtk_notebook_get_n_pages(nb) > 0;)
-					close__(area___::view__(nb, 0));
-				return true; }
-			}
-			break;
-		case 'x': close__(view); break;
 		case 'a': {
 			std::string name = p[1];
 			if(name[0] == '#')
 				name = ((window___*)view->window_)->name__() + name;
-			activa__(name, true);
+			if(activa__(name, true, true)) ret.push_back("1");
 			break; }
+		case 'm': {
+			GtkNotebook *nb = area->nb__();
+			if(nb) {
+				gtk_notebook_reorder_child(nb, view->scrolled__(), std::stoi(p[1]));
+			} else
+				err_.buzhichi__(p);
+			break; }
+		case 'x':
+			switch(tag[1]) {
+			case 't': {
+				GtkNotebook *nb = area->nb__();
+				if(nb) {
+					std::vector<pub::view___ *> ls, paichu;
+					get_tree__(view, nb, paichu, ls);
+					//printf("[%lu]\n",ls.size());
+					for(auto v : ls) {
+						//printf("%lu %s\n",v->id_,v->name__());
+						close__(v);
+					}
+					return true;
+				}
+				break; }
+			case 'a': {
+				GtkNotebook *nb = area->nb__();
+				if(nb) {
+					for(; gtk_notebook_get_n_pages(nb) > 0;)
+						close__(area___::view__(nb, 0));
+					return true;
+				}}
+			default:
+				close__(view);
+				break;
+			}
+			break;
 		case 'S':
 			if(!mk__(p, 1, p2))
 				return true;
@@ -593,11 +670,13 @@ void add___::del__(void* w) {
 		switch(area->opt_.typ_) {
 		case 'n': {
 			GtkNotebook *nb = area->nb__();
+			if(nb) {
 			sigs_nb_.del__(nb, nullptr);
 			for(int i = 0; i < gtk_notebook_get_n_pages(nb); i++) {
 				pub::view___* v = area___::view__(nb, i);
 				sigs_btn_.del__(nullptr, v);
 				sigs_view_.del__(v->widget__(), v);
+			}
 			}
 			break; }
 		}

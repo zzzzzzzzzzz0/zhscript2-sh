@@ -47,9 +47,15 @@ static void x__(int &x, int no, int i_x, int* out, bool is, int w2) {
 		return;
 	}
 	switch(no) {
-	case -2:
-		x = (w + x) / i_x;
-		return;
+	case -2: {
+		int w3 = x;
+		switch(w3) {
+		case -1: case -3: case -4: case -5: case -6: case -7: case -8: case -9: w3 = 0; break;
+		case -2: w3 = -w2; break;
+		default: w3 = x + 10; break;
+		}
+		x = (w + w3) / i_x;
+		return; }
 	}
 	if(x + w > 0) {
 		x += w;
@@ -89,7 +95,8 @@ static pub::tags___ tags_ = {
 		//{"显现", "S", 0},
 		{"隐藏", "h", 0},
 		{"居中", "c", 0},
-		{"最大化", "A", 0},
+		{"最大化", "A1", 0},
+		{"取消最大化", "A", 0},
 		{"最小化", "I1", 0},
 		{"取消最小化", "I", 0},
 		{"大小", "s", 0},
@@ -186,7 +193,10 @@ bool window___::api__(void* shangji, const std::vector<std::string>& p, std::vec
 		case 'c':
 			gtk_window_set_position(hr__(),GTK_WIN_POS_CENTER);
 			break;
-		case 'A': gtk_window_maximize (hr__()); break;
+		case 'A':
+			if(tag[1]) gtk_window_maximize (hr__());
+			else gtk_window_unmaximize (hr__());
+			break;
 		case 'I':
 #ifdef ver_debug_
 			debug_.o__(tag, " ", name__(), " ", p[0]);
@@ -377,8 +387,10 @@ static gboolean cb_configure_event__(GtkWidget *widget, GdkEventConfigure *event
 	}
 	int w = event->width, h = event->height;
 	if(win->width_ != w || win->height_ != h) {
+		bool b = false;
 		switch(win->width_) {
 		case -1:
+			b = true;
 			break;
 		default:
 			/*{ //原来返回TRUE
@@ -394,7 +406,10 @@ static gboolean cb_configure_event__(GtkWidget *widget, GdkEventConfigure *event
 		}
 		win->width_ = w;
 		win->height_ = h;
-		pub::ext_->jieshi2__(add___::get_view__(nullptr, win), "宽高", "ii", w, h);
+		auto v = add___::get_view__(nullptr, win);
+		if(b)
+			pub::ext_->jieshi2__(v, "初宽高", "ii", w, h);
+		pub::ext_->jieshi2__(v, "宽高", "ii", w, h);
 	}
 	liandong_.window_move__(win, x, y);
 	return false;
@@ -469,9 +484,9 @@ window___::~window___() {
 
 static int i_ = 0;
 
-window___::window___(bool is_app_paintable, bool is_main) : is_main_(is_main) {
+window___::window___(bool is_app_paintable, bool is_popup, bool is_main) : is_main_(is_main) {
 	add_ = new add___();
-	hr_ = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	hr_ = gtk_window_new(is_popup ? GTK_WINDOW_POPUP : GTK_WINDOW_TOPLEVEL);
 	name__(("窗" + std::to_string(++i_)).c_str());
 	if(is_app_paintable) {
 		app_paintable__(hr_);

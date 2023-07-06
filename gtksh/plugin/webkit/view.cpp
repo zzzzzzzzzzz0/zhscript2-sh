@@ -304,7 +304,7 @@ bool view___::api__(void* shangji, const std::vector<std::string>& p, std::vecto
 	return pub::view___::api__(shangji, p, p2, ret);
 }
 
-void view___::new_open__(const std::vector<std::string>& p) {
+void view___::new_open__(const std::vector<std::string>& p, bool is_new) {
 	if(p.size() > 0) load_uri__(p[0]);
 }
 void view___::add_end__(bool is_switch) {
@@ -369,6 +369,13 @@ void view___::load_uri__(const std::string &url) {
 	webkit_web_view_load_uri(hr__(), url.empty() ? "about:blank" : url.c_str());
 }
 
+void view___::focus1__() {
+	if(!focus1_) {
+		focus1_ = true;
+		gtk_widget_grab_focus(hr_);
+	}
+}
+
 static gboolean cb_close__(WebKitWebView* webView, gpointer user_data) {
 	pub::sign___* sign = (pub::sign___*)user_data;
 	view___* view = (view___*)sign->data_;
@@ -380,8 +387,9 @@ static gboolean cb_close__(WebKitWebView* webView, gpointer user_data) {
 
 static void cb_load_changed__(WebKitWebView  *web_view, WebKitLoadEvent load_event, gpointer user_data) {
 	switch (load_event) {
-	case WEBKIT_LOAD_STARTED:
 	case WEBKIT_LOAD_FINISHED:
+		((view___*)(((pub::sign___*)user_data)->data_))->focus1__();
+	case WEBKIT_LOAD_STARTED:
 		run_js__(web_view, add_zs_.c_str(), nullptr);
 		break;
 	default:
@@ -497,7 +505,24 @@ static void cb_title__(WebKitWebView *webView, GParamSpec *pspec, gpointer user_
 	pub::ext_->jieshi22__(user_data, "s", webkit_web_view_get_title(webView));
 }
 
+#ifdef ver_test_
+static GtkActionGroup *gag_ = gtk_action_group_new ("z");
+static gboolean
+cb_context_menu__ (WebKitWebView       *web_view,
+               WebKitContextMenu   *context_menu,
+               GdkEvent            *event,
+               WebKitHitTestResult *hit_test_result,
+               gpointer             user_data) {
+	GtkAction* a = gtk_action_group_get_action (gag_, "z");
+	WebKitContextMenuItem *item = webkit_context_menu_item_new(a);
+	webkit_context_menu_append (context_menu, item);
+}
+#endif
+
 static pub::sigs___ sigs_ = {
+#ifdef ver_test_
+		{"context-menu", G_CALLBACK(cb_context_menu__), nullptr},
+#endif
 		{"notify::title", G_CALLBACK(cb_title__), "页标题"},
 		{"load-changed", G_CALLBACK(cb_load_changed__), "装载"},
 		{"script-dialog", G_CALLBACK(cb_script_dialog__), "对话框"},

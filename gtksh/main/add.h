@@ -30,12 +30,12 @@ public:
 
 	static bool begin__(pub::view___ * view, void* w, pub::view___ *from_view, pub::add_opt___* opt);
 	static void end__(pub::view___ * view, void* w, pub::add_opt___* opt, std::vector<std::string>* p, pub::plugin___ *p2);
-	static void end_3__(pub::view___ * view, std::vector<std::string>* p, bool is_switch);
 	static void code__(pub::view___ * view);
 
 	static pub::view___ * get_view__(const char *name, void* w);
 	static void close__(pub::view___ *);
-	static pub::view___* activa__(const std::string &name, bool to);
+	static pub::view___* activa__(const std::string &name, bool to, bool to2, GtkNotebook **nb2 = nullptr, int* i2 = nullptr);
+	static void curr__(GtkNotebook *nb2, int i2);
 	static void for_view__(void* w, std::function<bool(pub::view___*)> fn);
 
 	static bool api__(pub::view___ * view, void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret);

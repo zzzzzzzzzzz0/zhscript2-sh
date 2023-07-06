@@ -32,11 +32,12 @@ public:
 	virtual GtkWidget *scrolled__() {return hr_;}
 
 	virtual bool api__(void* shangji, const std::vector<std::string>& p, std::vector<data___>* p2, std::vector<std::string>& ret);
-	virtual void new_open__(const std::vector<std::string>& p) {}
+	virtual void new_open__(const std::vector<std::string>& p, bool is_new) {}
 	void add_end__(const std::vector<std::string>& p);
 	virtual void add_end__(bool is_switch) {init__();}
 	void init__(bool and2 = true);
 	void init2__(int by);
+	void init2_need__() {init2_need_ = true;}
 	bool has_init__() {return init_;}
 	int init2_by__() {return init2_by_;}
 

@@ -10,6 +10,7 @@
 
 #include <functional>
 #include <vector>
+#include <string>
 
 class err2___ {
 private:

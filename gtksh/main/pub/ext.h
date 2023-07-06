@@ -31,7 +31,8 @@ public:
 	std::function<void(const std::vector<std::string>& p, size_t)> throw_buzhichi__ = nullptr;
 	std::function<void(const std::vector<std::string>& p, size_t)> throw_wufa__ = nullptr;
 
-	std::function<bool (void* w, view___ *v, const char* src, const char* src2, void* shangji, bool p_has_src2, std::vector<std::string>* p, std::vector<pub::data___>* p2, std::vector<std::string> *ret)> jieshi__ = nullptr;
+	std::function<bool (void* w, view___ *v, const char* src, const char* src2, void* shangji, bool p_has_src2,
+			std::vector<std::string>* p, std::vector<pub::data___>* p2, std::vector<std::string> *ret)> jieshi__ = nullptr;
 	bool jieshi2__(pub::view___ *v, const char* src2, const char* argc = nullptr,...);
 	bool jieshi21__(void* w, const char* src2, const char* argc = nullptr,...);
 	bool jieshi22__(void* user_data, const char* argc = nullptr,...);
@@ -45,6 +46,8 @@ public:
 	view___* (*get_view__)(const std::string& name1, unsigned long id2) = nullptr;
 	void (*push__)(view___*, const char*, std::vector<std::string>&) = nullptr;
 	bool (*wait__)(const char* s) = nullptr;
+
+	bool (*exists_)(const char *filename) = nullptr;
 };
 
 extern ext___* ext_;

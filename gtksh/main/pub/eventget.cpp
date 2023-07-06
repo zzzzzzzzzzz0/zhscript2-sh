@@ -12,12 +12,38 @@ namespace pub {
 
 static gboolean event_mouse__(GtkWidget *widget, GdkEventButton *event, gpointer data) {
 	event___* e = (event___*)data;
-	ext_->jieshi23__(e->code_.c_str(), e->name_.c_str(), nullptr, "ldd", event->button, event->x, event->y);
+	//ext_->jieshi23__(e->code_.c_str(), e->name_.c_str(), nullptr, "ldd", event->button, event->x, event->y);
+	std::vector<std::string> p, ret;
+	p.push_back(std::to_string(event->button));
+	p.push_back(std::to_string(event->x));
+	p.push_back(std::to_string(event->y));
+	ext_->jieshi__(nullptr, (pub::view___*)base___::var__(widget, ""),
+			e->code_.c_str(), e->name_.c_str(), nullptr, false, &p, nullptr, &ret);
+	if(ret.size() == 1) {
+		if(ret[0] == "y") return true;
+		if(ret[0] == "n") return false;
+	}
 	return e->b_;
 }
 static gboolean event_key__(GtkWidget *widget, GdkEventKey *event, gpointer data) {
 	event___* e = (event___*)data;
-	ext_->jieshi23__(e->code_.c_str(), e->name_.c_str(), nullptr, "s", gdk_keyval_name(event->keyval));
+	std::string state;
+	if((event->state & GDK_SUPER_MASK))
+		state += "Super";
+	if((event->state & GDK_SHIFT_MASK))
+		state += "Shift";
+	if((event->state & GDK_CONTROL_MASK))
+		state += "Control";
+	if((event->state & GDK_MOD1_MASK))
+		state += "Alt";
+	//ext_->jieshi23__(e->code_.c_str(), e->name_.c_str(), nullptr, "ss", gdk_keyval_name(event->keyval), state.c_str());
+	std::vector<std::string> p, ret;
+	p.push_back(gdk_keyval_name(event->keyval));
+	p.push_back(state);
+	ext_->jieshi__(nullptr, nullptr, e->code_.c_str(), e->name_.c_str(), nullptr, false, &p, nullptr, &ret);
+	if(!e->b_ && ret.size() == 1 && ret[0] == "x") {
+		return TRUE;
+	}
 	return e->b_;
 }
 static gboolean event_scroll__(GtkWidget *widget, GdkEventScroll *scroll, gpointer data) {
@@ -32,8 +58,8 @@ static gboolean event_other__(GtkWidget *widget, GdkEvent *event, gpointer data)
 }
 
 
-char event_get___::api__(const std::vector<std::string>& p, GObject *obj) {
-	for(size_t i2 = 1; i2 < p.size();) {
+char event_get___::api__(const std::vector<std::string>& p, GObject *obj, size_t from, bool b) {
+	for(size_t i2 = from; i2 < p.size();) {
 		const std::string& p2 = p[i2++];
 		if(i2 >= p.size()) {
 			return '<';
@@ -42,7 +68,7 @@ char event_get___::api__(const std::vector<std::string>& p, GObject *obj) {
 		event___* e = new event___();
 		e->code_ = p3;
 		e->name_ = p2;
-		e->b_ = TRUE;
+		e->b_ = b;
 		std::string head = "key";
 		if(p2.compare(0, head.size(), head) == 0) {
 			g_signal_connect(obj, p2.c_str(), G_CALLBACK(event_key__), e);

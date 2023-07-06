@@ -25,7 +25,7 @@ public:
 	event_get___();
 	virtual ~event_get___();
 
-	char api__(const std::vector<std::string>& p, GObject *obj);
+	char api__(const std::vector<std::string>& p, GObject *obj, size_t from = 1, bool b = TRUE);
 };
 
 } /* namespace pub */
