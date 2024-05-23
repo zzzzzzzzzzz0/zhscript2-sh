@@ -13,10 +13,18 @@
         }
         ,
         {
-            "name": "(gdb) opt2 startbox2", "type": "cppdbg", "request": "launch",
-            "program": "/opt2/debug/zhscript2/l", "args": [
-                "/opt2/opt/startbox2/begin.zs", "ne", "-1", "-s", "3s"
-            ], "stopAtEntry": false, "cwd": "${workspaceFolder}", "environment": [], "externalConsole": false, "MIMode": "gdb",
+            "name": "(gdb) opt2 startbox2", "type": "cppdbg", "request": "launch", "preLaunchTask": "b--zs2all",
+            "program": "/opt2/debug/zhscript2/gtksh", "args": [
+                "/opt2/opt/startbox2/ui.zs", "ne", "-1", "-s", "3s", "-h3"
+            ], "stopAtEntry": false, "cwd": "/tmp", "environment": [], "externalConsole": false, "MIMode": "gdb",
+            "setupCommands": [{"text": "-enable-pretty-printing", "ignoreFailures": true}, {"text": "-gdb-set disassembly-flavor intel", "ignoreFailures": true}]
+        }
+        ,
+        {
+            "name": "(gdb) test close2", "type": "cppdbg", "request": "launch", "preLaunchTask": "b--zs2all",
+            "program": "/opt2/debug/zhscript2/gtksh", "args": [
+                "/zzzzzzzzzzz4/home/zzzzzzzzzzz/test/1/gtksh-close2.zs"
+            ], "stopAtEntry": false, "cwd": "/tmp", "environment": [], "externalConsole": false, "MIMode": "gdb",
             "setupCommands": [{"text": "-enable-pretty-printing", "ignoreFailures": true}, {"text": "-gdb-set disassembly-flavor intel", "ignoreFailures": true}]
         }
     ]

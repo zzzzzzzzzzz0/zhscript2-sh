@@ -1,0 +1,21 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "b--zs2all",
+            "command": "make",
+            "args": [
+                "dd=../../../github"
+            ],
+            "options": {
+                "cwd": "/zzzzzzzzzzz/github/bin/zhscript2"
+            },
+            "problemMatcher": ["$gcc"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        }
+    ],
+    "version": "2.0.0"
+}
