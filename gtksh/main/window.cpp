@@ -372,6 +372,8 @@ static gboolean cb_delete_event__(GtkWidget *widget, GdkEvent *event, gpointer g
 	if(w->is_main__())
 		p2.push_back("1");
 	pub::ext_->jieshi__(w, nullptr, nullptr, sig->name_, nullptr, false, &p2, nullptr, &p);
+	if(w->in_destroy__())
+		return false;
 	return pub::bool__(p, 0, false);
 }
 
@@ -451,8 +453,11 @@ static pub::sigs___ sigs_ = {
 };
 
 void window___::destroy__() {
-	//g_signal_emit_by_name(widget__(), "delete-event"/*"destroy"*/);
-	gtk_widget_destroy(widget__());
+	destroy_ = true;
+	//g_signal_emit_by_name(widget__(), "delete-event");
+	//g_signal_emit_by_name(widget__(), "destroy");
+	//gtk_widget_destroy(widget__());
+	gtk_window_close(hr__());
 }
 
 void window___::app_paintable__(GtkWidget *hr) {

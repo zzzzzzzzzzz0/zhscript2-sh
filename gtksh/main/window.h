@@ -36,6 +36,9 @@ public:
 	bool api__(void* shangji, const std::vector<std::string>& p, std::vector<pub::data___>* p2, std::vector<std::string>& ret);
 
 	void destroy__();
+	bool in_destroy__() {return destroy_;}
+private:
+	bool destroy_ = false;
 };
 
 extern std::vector<window___*> windows_;
